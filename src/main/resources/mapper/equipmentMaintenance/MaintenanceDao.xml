@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.equipmentMaintenance.dao.MaintenanceDao">
+    <!--    添加大赛、实训维护数据-->
+    <insert id="insertMaintenance" parameterType="com.haocai.module.equipmentMaintenance.vo.Maintenance">
+        insert into trainmeg_keep(id, department_trainmeg, conType,principal, account)
+            value (#{id}, #{name},'4',#{principal}, #{account})
+    </insert>
+
+    <select id="selectNameByAccount" parameterType="string" resultType="string">
+        select name as principal
+        from sys_user
+        where account = #{account}
+    </select>
+    <select id="selectMaintenance" parameterType="com.haocai.module.equipmentMaintenance.vo.param.MaintenanceParam" resultType="com.haocai.module.equipmentMaintenance.vo.Maintenance">
+        select id,department_trainmeg name,principal, account from trainmeg_keep
+        <where>
+            conType = '4'
+            <if test="department!=null">and department_trainmeg like #{department}"%"</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%"</if>
+            <if test="principal!=null">and principal like "%"#{principal}"%"</if>
+        </where>
+        limit
+        #{page},#{limit}
+    </select>
+
+    <select id="selectMaintenanceCount" parameterType="com.haocai.module.equipmentMaintenance.vo.param.MaintenanceParam"
+            resultType="integer">
+        select count(*) from trainmeg_keep
+        <where>
+            conType = '4'
+            <if test="department!=null">and department_trainmeg like #{department}"%"</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%"</if>
+            <if test="principal!=null">and principal like "%"#{principal}"%"</if>
+        </where>
+    </select>
+    <select id="selectMaintenanceByName" resultType="java.lang.Integer">
+        select count(*) from trainmeg_keep where department_trainmeg = #{name} and  conType = '4'
+    </select>
+
+    <delete id="deleteMaintenanceById" parameterType="string">
+        delete
+        from trainmeg_keep
+        where id = ${id}
+    </delete>
+    <update id="updateMaintenanceById" parameterType="com.haocai.module.equipmentMaintenance.vo.Maintenance">
+        update trainmeg_keep
+        set department_trainmeg = #{name}
+        where id = #{id}
+    </update>
+</mapper>

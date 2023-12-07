@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.consumableslist.dao.ReviewMapper">
+
+    <!--查询当前人员需要审核的数据数量-->
+    <select id="getAllReviewDataCount" parameterType="com.haocai.module.consumableslist.param.ReviewParam"
+            resultType="Integer">
+        select count(*) from review_table re inner join t_consumableslist con
+        on re.review_id=con.review_id
+        where re.re_pe_id=#{re_pe_id}
+        <if test="status==null">
+            and re.status is not null
+        </if>
+        <if test="status!=null and status!=''">
+            and re.status =#{status}
+        </if>
+        <if test="name!=null and name!=''">
+            and con.name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="attribute!=null and attribute!=''">
+            and con.attribute=#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and con.type=#{type}
+        </if>
+        <if test="department!=null and department!=''">
+            and con.department=#{department}
+        </if>
+        <if test="training!=null and training!=''">
+            and con.training like CONCAT('%',#{training},'%')
+        </if>
+        <if test="major!=null and major!=''">
+            and con.mark=#{major}
+        </if>
+    </select>
+
+    <!--查询当前用户所需要审核的全部数据-->
+    <select id="getAllReviewData" resultType="com.haocai.module.consumableslist.vo.ReviewTable"
+            parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        select re.id, re.review_id, re.project_name, re.before_re, re.re_pe_id, re.after_re, re.status, re.role,
+        re.audit_body, con.name, con.department, con.attribute, con.standards, con.type, con.operatorname, con.opinion
+        from review_table re inner join t_consumableslist con
+        on re.review_id=con.review_id
+        where re.re_pe_id=#{re_pe_id}
+        <if test="status==null">
+            and re.status is not null
+        </if>
+        <if test="status!=null and status!=''">
+            and re.status =#{status}
+        </if>
+        <if test="name!=null and name!=''">
+            and con.name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="attribute!=null and attribute!=''">
+            and con.attribute=#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and con.type=#{type}
+        </if>
+        <if test="department!=null and department!=''">
+            and con.department=#{department}
+        </if>
+        <if test="training!=null and training!=''">
+            and con.training like CONCAT('%',#{training},'%')
+        </if>
+        <if test="major!=null and major!=''">
+            and con.mark=#{major}
+        </if>
+        order by operatordate desc limit #{page},#{limit}
+    </select>
+
+    <!--查询专业条件下的数据数量-->
+    <select id="getAllReviewDataCountByMajor" resultType="com.haocai.module.consumableslist.vo.ReviewTable"
+            parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        select re.id, re.review_id, re.project_name, re.before_re, re.re_pe_id, re.after_re, re.status, re.role,
+        re.audit_body, con.name, con.department, con.attribute, con.type, con.operatorname, con.opinion
+        from review_table re inner join t_consumableslist con
+        on re.review_id=con.review_id
+        where re.re_pe_id=#{re_pe_id}
+        <if test="status==null">
+            and re.status is not null
+        </if>
+        <if test="status!=null and status!=''">
+            and re.status =#{status}
+        </if>
+        <if test="name!=null and name!=''">
+            and con.name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="attribute!=null and attribute!=''">
+            and con.attribute=#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and con.type=#{type}
+        </if>
+        <if test="department!=null and department!=''">
+            and con.department=#{department}
+        </if>
+        <if test="training!=null and training!=''">
+            and con.training like CONCAT('%',#{training},'%')
+        </if>
+
+    </select>
+
+    <!--审核时查询具体要审核的数据-->
+    <select id="getReviewData" resultType="com.haocai.module.consumableslist.vo.Consumableslist"
+            parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        select * from t_consumableslist where review_id in
+        <foreach collection="reviewIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--查询list表中的mark字段-->
+    <select id="getCourseMajorData" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        select distinct mark as major
+        from t_consumableslist
+        where department = #{department}
+    </select>
+
+    <!--查询课程表里实训项目-->
+    <select id="getTrainingByCourseData" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        select training from t_course where 1=1
+        <if test="major!=null and major!=''">
+            and major =#{major}
+        </if>
+
+        and department=#{department}
+
+    </select>
+
+
+    <!--审核后修改自己的状态-->
+    <update id="reviewUpdateMe" parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        update review_table
+        set status=#{status}
+        where id = #{id}
+    </update>
+
+    <!--审核后修改审核表下一或上一审核员状态-->
+    <update id="reviewUpdateOther" parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        update review_table
+        set status=#{status}
+        where re_pe_id = #{re_pe_id}
+          and review_id = #{review_id}
+    </update>
+
+    <!--审核后修改三条数据的状态为已退回-->
+    <update id="reviewUpdateThree" parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        update review_table
+        set status=2
+        where review_id = #{review_id}
+    </update>
+
+    <!--审核后修改目录表的审核流程状态-->
+    <update id="reviewUpdateConsumList" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        update t_consumableslist set
+        <if test="status_z!=null and status_z!=''">
+            status_z=#{status_z}
+        </if>
+        <if test="status!=null and status_z!=null">
+            ,
+        </if>
+        <if test="status!=null and status!=''">
+            status=#{status}
+        </if>
+        where review_id=#{review_id};
+    </update>
+
+    <!--向目录表添加审核意见-->
+    <update id="addReviewOpinion" parameterType="com.haocai.module.consumableslist.param.ReviewParam">
+        update t_consumableslist
+        set opinion=#{audit_body}
+        where review_id = #{review_id};
+    </update>
+
+    <!--审核数据时查询审核表里要审核的数据-->
+    <select id="getReviewTableData" parameterType="com.haocai.module.consumableslist.param.ReviewParam"
+            resultType="com.haocai.module.consumableslist.param.ReviewParam">
+        select *
+        from review_table
+        where id = #{id};
+    </select>
+
+
+</mapper>

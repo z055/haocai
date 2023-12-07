@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.system.dao.RoleMapper">
+    <resultMap id="role" type="Role">
+        <id property="role_id" column="role_id"/>
+        <result property="pid" column="pid"/>
+        <result property="description" column="description"/>
+        <result property="name" column="name"/>
+        <result property="create_user" column="create_user"/>
+        <result property="update_user" column="update_user"/>
+    </resultMap>
+
+    <sql id="role_select_field">
+        r.name,r.pid,r.role_id,r.description
+    </sql>
+
+    <select id="queryAllCount" resultType="int">
+        select count(*) from sys_role
+        <where>
+            <if test="condition!=null and condition !=''">
+                name like concat('%',#{condition},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findRole" resultMap="role">
+        select
+        <include refid="role_select_field"/>
+        from sys_role as r
+        <where>
+            <if test="condition!=null and condition !=''">
+                name like concat('%',#{condition},'%')
+            </if>
+        </where>
+        limit #{startPage}, #{limit}
+    </select>
+
+    <select id="findName" resultMap="role">
+        select
+        <include refid="role_select_field"/>
+        from sys_role as r
+        <where>
+            <if test="name!=null and name !=''">
+                name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="addRole" parameterType="com.haocai.module.system.vo.Role">
+        insert into sys_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test = "name!=null || name!=''">
+                name,
+            </if>
+            <if test = "pid!=null || pid!=''">
+                pid,
+            </if>
+            <if test = "description!=null || description!=''">
+                description,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test = "name!=null || name!=''">
+                #{name},
+            </if>
+            <if test = "pid!=null || pid!=''">
+                #{pid},
+            </if>
+            <if test = "description!=null || description!=''">
+                #{description},
+            </if>
+        </trim>
+    </insert>
+
+    <delete id="deleteRole">
+        DELETE FROM
+            sys_role
+        <where>
+            <if test = "name!=null || name!=''">
+                name = #{name}
+            </if>
+        </where>
+    </delete>
+
+    <update id="updateRole">
+        UPDATE
+            sys_role
+        <set>
+            <if test = "name!=null || name!=''">
+                name = #{name},
+            </if>
+            <if test = "description!=null || description!=''">
+                description = #{description}
+            </if>
+        </set>
+        WHERE
+            role_id = #{role_id}
+
+    </update>
+
+    <select id="getRole" resultMap="role">
+        select role_id,pid,name from sys_role
+    </select>
+    <select id="getRoleToTree" resultType="com.haocai.module.system.vo.ZTreeNode">
+        select role_id as id,pid as pId,name from sys_role
+    </select>
+
+    <select id="selectById" resultMap="role">
+        select
+        <include refid="role_select_field"/>
+        from sys_role as r where role_id=#{roleId}
+    </select>
+
+</mapper>

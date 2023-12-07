@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>选择角色</title>
+</head>
+<body>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-input-block">
+                        <table class="layui-hide" id="demo" lay-filter="test"></table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="layui-form-item" style="display: none">
+                <div class="layui-inline">
+                    <label class="layui-form-label required">专业</label>
+                    <div class="layui-input-block">
+                        <select id="major" name="major" lay-filter="majorSelect" lay-verify="required" lay-reqtext="请选择专业">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-input-block">
+                <button id="addBtn" lay-submit lay-filter="addBtn" class="layui-btn" type="submit">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form','layer'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.jquery,
+            table = layui.table,
+            currentUser = layui.sessionData('userInfo')['user'];
+
+
+        function initTable() {
+            //执行一个 table 实例
+            //渲染表格初始化
+            table.render({
+                elem: '#demo'
+                ,height: 530
+                ,url: '/role/findRoleToSelect' //数据接口
+                ,title: '耗材目录'
+                ,page: true //开启分页
+                ,totalRow: true //开启合计行
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field: 'role_id', title: 'role_id', sort: true, fixed: 'left', totalRowText: '合计：',hide:'true'}
+                    ,{field: 'name', title: '请选择角色', sort: true}
+                ]]
+            });
+        }
+        //初始化表格
+        initTable();
+
+        //监听table选中
+        table.on('checkbox(test)',function (obj) {
+            if (obj.data.name === "专业负责人"){
+                if (obj.checked === true) { //checked
+                    $('.layui-form-item').eq(1).css('display', 'block')
+                    getMajor();
+                } else {
+                    $('.layui-form-item').eq(1).css('display', 'none')
+                    // 删除专业下拉框以免提交时必填判断
+                    $('#major option').remove()
+                }
+            }
+                console.log(obj.data)
+        })
+
+        function getMajor (){
+            $.post('/user/findMajorToSelect',function (res){
+                var str = '<option value="">--请选择专业--</option>'
+                for(let i = 0;i < res.length;i ++){
+                    str += '<option value=' + res[i]["zhuanyeid"] + '>' + res[i]["name"] + '</option>'
+                }
+                $('#major option').remove()
+                $('#major').append(str)
+                form.render('select')
+            },'json')
+        }
+
+        // 保存角色
+        form.on('submit(addBtn)',function (){
+            var res = table.checkStatus('demo').data
+            var roleId = "";
+            var major = $("#major").val()
+            for (i = 0; i < res.length; i++) {
+                roleId = roleId + res[i].role_id+","
+            }
+            console.log(roleId)
+            $.post('/user/setRole',{roleId:roleId,majorId:major,userId:currentUser.userId},function (data){
+                if(data > 0){
+                    layer.msg('角色选择成功，即将跳转',{icon:1,time:1500},function (){
+                        parent.layer.close(parent.layer.index)
+                    })
+                }
+            })
+            return false;
+        })
+    })
+</script>
+</html>

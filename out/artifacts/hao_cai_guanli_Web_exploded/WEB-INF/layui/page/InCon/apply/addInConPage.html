@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>入库审核</title>
+</head>
+<style>
+    body .demo-class .layui-layer-btn1{
+        border-color: #4898d5;
+        background-color: red;
+        color: #fff;
+    }
+</style>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input id="consumableName" type="text" required lay-verify="required" placeholder="请输耗材名称" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <select id="attribute" name="attribute">
+                            <option value="">耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="type" name="type">
+                            <option value="">耗材类别</option>
+                            <option value="1">酒店食品</option>
+                            <option value="2">金属材料</option>
+                            <option value="3">电子电器</option>
+                            <option value="4">建筑材料</option>
+                            <option value="5">服装服饰</option>
+                            <option value="6">文化绘画</option>
+                            <option value="7">工作仪表</option>
+                            <option value="8">化工药品</option>
+                            <option value="9">气体类</option>
+                            <option value="10">维修保养</option>
+                            <option value="11">其他</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="department" name="department">
+                            <option value="">二级学院</option>
+                        </select>
+                    </div>
+                    <button type="button" class="layui-btn layui-btn-normal" id="searchBtn">搜索</button>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+</div>
+
+<script type="text/html" id="currentTableBar">
+
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">入库</a>
+
+</script>
+
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+
+    layui.use(['form', 'table', 'laydate','layer'], function () {
+        var form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate,
+            layer = layui.layer,
+            $ = layui.jquery
+
+        var chukuMgr = {
+            tableId: 'currentTableId',
+            condition: {
+                consumableName: '',
+                attribute: '',
+                type: '',
+                department: '',
+            }
+        }
+
+        // 入库搜索
+        chukuMgr.search = function (data){
+            console.log("data.department="+data.department);
+            data.consumableName = $("#consumableName").val(),
+            data.attribute = $("#attribute").val(),
+            data.type = $("#type").val(),
+            data.department = $("#department").val(),
+            table.reload(chukuMgr.tableId,{where:data,page:{curr:1}})
+        }
+
+        //渲染学院下拉框
+        $.ajax({
+            url:'/dept/getDept',
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                console.log(data)
+                var str = '<option value=""></option>'
+                for (let i = 0; i < data.length; i++) {
+                    str += '<option value="' + data[i]['full_name'] + '">' + data[i]['full_name'] + '</option>'
+                }
+                $('#department option').remove()
+                $('#department').append(str)
+                form.render("select")
+            }
+        })
+
+        // 初始化表格列
+        chukuMgr.initColumn = function (){
+            return [[
+                {type: "checkbox", width: 50},
+                {field: 'oid', width: 40,hide:true},
+                {field: 'consumablesid', width: 40,hide:true},
+                {field: 'consumableName', width: 150,title: '耗材名称'},
+                {field: 'number', width: 150, title: '耗材数量', sort: true},
+                {field: 'price', width: 150, title: '耗材单价', sort: true},
+                ,{field: 'attribute', title: '属性',
+                    // templet:function (res){
+                    //     switch (res.attribute){
+                    //         case '1':
+                    //             return '低值易耗品';
+                    //         case '2':
+                    //             return '低值耐用品';
+                    //     }
+                    // }
+                }
+                ,{field: 'type', title: '类型',
+                    // templet:function (res){
+                    //     switch (res.type){
+                    //         case '1':
+                    //             return '酒店食品';
+                    //         case '2':
+                    //             return '金属材料';
+                    //         case '3':
+                    //             return '电子电器';
+                    //         case '4':
+                    //             return '建筑材料';
+                    //         case '5':
+                    //             return '服装服饰';
+                    //         case '6':
+                    //             return '文化绘画';
+                    //         case '7':
+                    //             return '工作仪表';
+                    //         case '8':
+                    //             return '化工药品';
+                    //         case '9':
+                    //             return '气体类';
+                    //         case '10':
+                    //             return '维修保养';
+                    //         case '11':
+                    //             return '其他';
+                    //     }
+                    // }
+                },
+                {field: 'department', width: 150, title: '所属学院', sort: true},
+                {field: 'status', width: 150, title: '状态', sort: true, templet:function (res){
+                        switch (res.status){
+                            case '6':
+                                return '采购成功'
+                            default :
+                                return '<span style="color: #9d6b00;">采购中</span>'
+                        }
+                    }},
+                {title: '操作', minWidth: 200, toolbar: '#currentTableBar', align: "center", fixed: 'right',}
+            ]];
+        }
+
+
+        // 库存表格
+        table.render({
+            elem: '#' + chukuMgr.tableId,
+            url: "/TConsumables/queryPurchase",
+            cols: chukuMgr.initColumn(),
+            page:true,
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 10,
+            skin: 'line',
+            where:{
+                condition: chukuMgr.condition
+            },
+            success:function (data) {
+              console.log("data="+data)
+            }
+        })
+
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            console.log("conData"+obj.data)
+            layui.sessionData("conData", {
+                key:'data',
+                value:data
+            })
+            if (obj.event === 'edit') {
+
+                var index = layer.open({
+                    title: '出库提交',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['50%', '100%'],
+                    content: '/page/inConSubmit',
+                    end:function (){
+                        chukuMgr.search(chukuMgr.condition);
+                    }
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                table.reload(chukuMgr.tableId,{where:data,page:{curr:1}})
+                return false;
+            }
+        });
+
+
+        //绑定搜索
+        $('#searchBtn').on('click',function (){
+            chukuMgr.search(chukuMgr.condition);
+        })
+
+    })
+</script>
+</html>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.system.dao.MenuMapper">
+    <resultMap id="menu" type="com.haocai.module.system.vo.Menu">
+        <id property="menuId" column="menuId"/>
+        <result property="code" column="code"/>
+        <result property="pcode" column="pcode"/>
+        <result property="title" column="title"/>
+        <result property="href" column="href"/>
+        <result property="icon" column="icon"/>
+        <result property="sonNum" column="sonNum"/>
+        <result property="target" column="target"/>
+    </resultMap>
+
+    <sql id="menu_select_field">
+        m.menu_id as menuId, m.code, m.pcode, m.title, m.href, icon, target, son_num as sonNum
+    </sql>
+
+    <select id="queryAllMenu" resultMap="menu">
+        select
+        <include refid="menu_select_field"/>
+        FROM
+        sys_menuapi m
+    </select>
+
+    <select id="queryByCode" resultMap="menu">
+        select *
+        FROM sys_menuapi
+        <where>
+                code = #{code}
+        </where>
+    </select>
+
+    <select id="getPermission" resultMap="menu">
+        select
+        <include refid="menu_select_field"/>
+        FROM
+        sys_menuapi m
+        <where>
+            <if test="pcode !=null">
+                pcode = #{pcode}
+            </if>
+        </where>
+        ORDER BY levels
+    </select>
+
+    <select id="getMenu" resultMap="menu">
+        select title,menu_id menuId
+        from sys_menuapi
+        <where>
+            son_num > 0
+        </where>
+    </select>
+
+    <insert id="addMenu" parameterType="com.haocai.module.system.vo.Menu">
+        insert into sys_menuapi
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test = "title!=null || title!=''">
+                title,
+            </if>
+            <if test = "pcode!=null">
+                pcode,
+            </if>
+            <if test = "code!=null">
+                code,
+            </if>
+            <if test = "href!=null">
+                href,
+            </if>
+            <if test = "sonNum!=null">
+                son_num,
+            </if>
+            <if test = "icon!=null">
+                icon,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test = "title!=null || title!=''">
+                #{title},
+            </if>
+            <if test = "pcode!=null">
+                #{pcode},
+            </if>
+            <if test = "code!=null">
+                #{code},
+            </if>
+            <if test = "href!=null">
+                #{href},
+            </if>
+            <if test = "sonNum!=null">
+                #{sonNum},
+            </if>
+            <if test = "icon!=null">
+                #{icon},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateMenu" parameterType="com.haocai.module.system.vo.Menu">
+        update sys_menuapi
+        <set>
+            <if test = "title!=null || title!=''">
+                title = #{title},
+            </if>
+            <if test = "code!=null || code!=''">
+                code = #{code},
+            </if>
+            <if test = "pcode!=null">
+                pcode = #{pcode},
+            </if>
+            <if test = "href!=null || href!=''">
+                href = #{href},
+            </if>
+            <if test = "icon!=null || icon!=''">
+                icon = #{icon},
+            </if>
+        </set>
+        WHERE
+            menu_id = #{menuId}
+    </update>
+
+    <delete id="deleteMenu" parameterType="com.haocai.module.system.vo.Menu">
+        delete from
+            sys_menuapi
+        <where>
+            <if test="menuId != null">
+                menu_id = #{menuId}
+            </if>
+        </where>
+    </delete>
+
+    <select id="getAllMenu" resultMap="menu">
+        select menu_id menuId,pcode,title,son_num as sonNum
+        from sys_menuapi;
+    </select>
+
+<!--    <select id="getAllMenuId" resultMap="java.lang.Long">-->
+<!--        select menu_id-->
+<!--        from sys_menuapi;-->
+<!--    </select>-->
+
+</mapper>

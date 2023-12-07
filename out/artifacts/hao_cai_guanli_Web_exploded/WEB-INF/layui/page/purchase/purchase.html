@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css">
+    <title>采购管理</title>
+</head>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+
+                    <script type="text/html" id="departmentModel">
+                        <label class="layui-form-label">二级学院</label>
+                        <div class="layui-input-block">
+                            {{# if(d.isSch){ }}
+                            <select id="{{d.selectId}}" name="department"></select>
+                            {{# }else{ }}
+<!--                            与上面id一样，为防止id重复而报错-->
+                            <select id="department" name="department" disabled>
+                                <option value="{{d.deptName}}">{{d.deptName}}</option>
+                            </select>
+                            {{# } }}
+                        </div>
+                    </script>
+
+                    <div class="layui-inline">
+                        <div class="layui-inline">
+                            <select id="major" name="major" lay-search>
+                                <option value="">专业</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="departmentView" class="layui-inline"></div>
+                    <div class="layui-inline">
+                        <select id="status" name="status">
+                            <option value="">审核状态</option>
+                            <option value="0">未审核</option>
+                            <option value="1">审核通过</option>
+                            <option value="2">审核中</option>
+                            <option value="3">审核退回</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="attribute" name="attribute">
+                            <option value="">耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="type" name="type">
+                            <option value="">耗材类别</option>
+                            <option value="1">酒店食品</option>
+                            <option value="2">金属材料</option>
+                            <option value="3">电子电器</option>
+                            <option value="4">建筑材料</option>
+                            <option value="5">服装服饰</option>
+                            <option value="6">文化绘画</option>
+                            <option value="7">工作仪表</option>
+                            <option value="8">化工药品</option>
+                            <option value="9">气体类</option>
+                            <option value="10">维修保养</option>
+                            <option value="11">其他</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <input id="timeLimit" class="layui-input" type="text" name="timeLimit" placeholder="采购申请时间"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button type="button" id="searchBtn" class="layui-btn layui-btn-normal"><i class="layui-icon"></i> 搜 索</button>
+                    <button type="button" id="addBtn" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-addition"></i> 采 购</button>
+                    <button type="button" id="exportBtn" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-export"></i> 导 出 </button>
+                    <button type="button" id="importBtn" class="layui-btn layui-btn-normal"><i class="iconfont icon-daoru"></i> 导入采购信息 </button>
+                    <button type="button" id="summaryBtn" class="layui-btn layui-btn-normal"><i class="iconfont icon-shujuhuizong"></i> 提交审核</button>
+                    <button type="button" id="DeleteAll" class="layui-btn layui-btn-normal"><i class="iconfont icon-shujuhuizong"></i> 批量删除</button>
+                    <button type="button" id="againAll" class="layui-btn layui-btn-normal" style="color: black"><i class="iconfont icon-shujuhuizong"></i> 重新提交（退回的采购） </button>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="button" required lay-verify="required" autocomplete="off" class="layui-btn layui-btn-normal" id="all" value="当前采购的价值：">
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <span class="layui-layer-shad"></span>
+    <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+</div>
+<script type="text/html" id="currentTableBar">
+
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">修改</a>
+
+    <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+</script>
+<script id="re-modify" type="text/html">
+    <a class="layui-btn layui-btn-sm" lay-event="modify">重新修改</a>
+    <a class="layui-btn layui-btn-sm layui-btn-danger" lay-event="del">删除</a>
+</script>
+
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/sch-level.js"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+            ,util = layui.util;
+
+
+        var purchaseMgr = {
+            tableId:'currentTableId',
+            condition:{
+                department:'',
+                no:'',
+                attribute:'',
+                type:'',
+                timeLimit:''
+            }
+        }
+
+        $.ajax({
+            url: '/purchase/major',
+            type: 'post',
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                if (data==null){
+                        layer.alert('采购功能无法使用，请联系二级学院管理员，更新您的专业', {
+                            icon: 0,
+                        })
+                }else {
+                    var str = ''
+                    for (let i = 0; i < data.length; i++) {
+                        str += '<option value="' + data[i] + '" selected>' + data[i] + '</option>'
+                    }
+                    $('#major').append(str)
+                    form.render("select")
+                }
+
+            }
+        })
+        purchaseMgr.initColumn = function (){
+            return [[
+                {type: "checkbox", width: 50},
+                {field: 'id', width: 50,title: '采购ID',hide:true},
+                {field: 'consumablesid', width: 160,title: '耗材编号',hide:true},
+                {field: 'purchaseid', width: 160,title: '采购编号',hide:true},
+                {field: 'name', width: 105, title: '耗材名称', sort: true},
+                {field: 'standards', width: 105, title: '耗材规格', sort: true},
+                {field: 'mark', width: 105, title: '专业', sort: true},
+                {field: 'price', width: 105, title: '耗材单价', sort: true},
+                {field: 'number1', width: 105, title: '耗材数量', sort: true},
+                {field: 'studentsavg', width: 105, title: '生均数量', sort: true},
+                {field: 'studentnumber', width: 105, title: '学生数量', sort: true},
+                {field: 'allPrices', width: 80, title: '合计', sort: true,style: 'color:red'},
+                {field: 'attribute', width: 130, title: '耗材属性', sort: true,templet:function(res){
+                        let color = res.attribute === '低值易耗品' ? '#00ff4a' : '#006fff'
+                        return '<span style="color: ' + color + '">' + res.attribute + '</span>'
+                    }},
+
+                {field: 'department', width: 135, title: '二级学院', sort: true},
+                {field: 'status', width: 90, title: '状态', sort: true,templet:function (res){
+                        switch (res.status){
+                            case '0':
+                                return '待审核'
+                            case '1':
+                                return '<span style="color: #17af00;">审核成功</span>'
+                            case '2':
+                                return '<span style="color: #9d6b00;">审核中</span>'
+                            case '3':
+                                return '<span style="color: #9d6b00;">审核退回</span>'
+                        }
+                    }},
+                {field: 'statu', width: 130, title: '待审核（/退回）角色', sort: true,templet:function (res){
+                        switch (res.statu){
+                            case '0':
+                                return '<span style="color: black;">未提交</span>'
+                            case '1':
+                                return '<span style="color: black;">二级学院管理员</span>'
+                            case '2':
+                                return '<span style="color: black;">二级学院院长</span>'
+                            case '3':
+                                return '<span style="color: black;">教务处</span>'
+                            case '5':
+                                return '<span style="color:black;">采购已通过</span>'
+                        }
+                    }},
+                {field: 'opinion', width: 105, title: '审核意见', sort: true},
+                {field: 'operatorname', width: 120, title: '操作员姓名', sort: true},
+                // {title: '操作', minWidth: 220, toolbar: '#currentTableBar', align: "center", fixed: 'right',}
+                { fixed: 'right', minWidth: 220, align: 'center', templet: function (res) {
+                        switch (res.status){
+                            case '0':
+                                return '  <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">修改</a>\n' +
+                                    '      <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>  '
+                            case '1':
+                                return ''
+                            case '2':
+                                return ''
+                            case '3':
+                                return '<a class="layui-btn layui-btn-sm layui-btn-warm" lay-event="modify" >重新修改</a>\n' +
+                                    '  <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delAll">删除</a> '
+                        }
+
+                }
+            }
+            ]];
+        }
+        // 搜索
+        purchaseMgr.search = function (){
+            status = $('#status').val()
+            attribute= $('#attribute').val()
+            type = $('#type').val()
+            time = $('#timeLimit').val()
+            department = $('#department').val()
+            major=$("#major").val()
+            table.reload("currentTableId", {
+                url: '/purchase/selTeacher',
+                method: 'post',
+                where : {
+                    status:status,
+                    attribute:attribute,
+                    type :type,
+                    time:time,
+                    department:department,
+                    major:major
+                },
+                page: {
+                    curr: 1
+                }
+            })
+            $.ajax(
+                {
+                    url: "/purchase/selTeacherPrecie",
+                    type: "post",
+                    data: {
+                        status:status,
+                        attribute:attribute,
+                        type :type,
+                        time:time,
+                        department:department,
+                        major:major
+                    },
+                    success: function(data) {
+                        $('#all').val("当前价值："+data+"元")
+                    },
+                    error: function() {
+                    }
+                }
+            )
+        }
+
+        // 采购
+        purchaseMgr.addPurchase = function (department){
+            layui.sessionData('formOk',{key:'flag',value:false})
+            parent.layer.open({
+                title: '采购耗材',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['600px', '100%'],
+                content: '/page/purchaseAdd',
+                end:function (){
+                    // 判断是否采购成功
+                    if(layui.sessionData('formOk').flag){
+                        layer.msg('采购成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+            layui.sessionData('addPurchase',{key:'department',value:department})
+        }
+
+        // 修改采购耗材
+        purchaseMgr.editPurchase = function (id,consumablesid,studentnumber,number){
+            layui.sessionData('formOk',{key:'flag',value:false})
+            parent.layer.open({
+                title: '采购耗材',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['600px', '100%'],
+                content: '/page/purchaseEdit',
+                end:function (){
+                    // 判断是否修改成功
+                    if(layui.sessionData('formOk').flag){
+                        layer.msg('修改成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+            layui.sessionData('editPurchase',{key:'data',value:id + ',' + consumablesid + ',' + studentnumber + ',' + number})
+        }
+        // 删除采购
+        purchaseMgr.deletePurchase = function (id){
+            $.post('/purchase/judgmentStuts',
+                {id: id},
+                function (res) {
+                if (res==1){
+                    layer.msg('审核成功，无法删除', {icon:2, time: 2000,anim:6})
+                    table.reload(purchaseMgr.tableId)
+                }
+                  else
+                      if(res==2){
+                    layer.msg("审核中，无法删除", {icon:2, time: 2000 ,anim:6})
+                    table.reload(purchaseMgr.tableId)
+                }
+                else {
+                    layer.confirm('是否删除？',{icon:3},function (index) {
+                        $.post('/purchase/deletepurchase', {id: id}, function (res) {
+                            if (res > 0) {
+                                layer.msg('删除成功', {icon:2, time: 2000})
+                                table.reload(purchaseMgr.tableId)
+                            } else {
+                                layer.msg('删除失败', {icon:1, time: 2000})
+                                table.reload(purchaseMgr.tableId)
+                            }
+                        })
+                    })
+                }
+
+            })
+        }
+
+        purchaseMgr.delAllPurchase = function (id,purchaseid){
+                        layer.confirm('是否删除？',{icon:3},function (index) {
+                            $.post('/purchase/delAll', {id: id,purchaseid: purchaseid}, function (res) {
+                                if (res > 0) {
+                                    layer.msg('删除成功', {icon:2, time: 2000})
+                                    table.reload(purchaseMgr.tableId)
+                                } else {
+                                    layer.msg('删除失败', {icon:1, time: 2000})
+                                    table.reload(purchaseMgr.tableId)
+                                }
+                            })
+                        })
+
+        }
+
+
+        // 汇总
+        purchaseMgr.summary = function (){
+            var res = table.checkStatus('currentTableId')
+            if(res.data.length === 0){
+                layer.msg('请选择提交内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                // 判断是否可以审核
+                let flag = true;
+                // 将id拼串
+                let ids = ''
+                for(let i = 0;i < res.data.length;i++){
+                    let status = res.data[i].status
+                    ids += res.data[i].id + ','
+                    if(status === '1' || status === '2'|| status === '3'){
+                        flag = false
+                        break;
+                    }
+                }
+                if(flag){
+                    layui.sessionData('formOk',{key:'flag',value:false})
+                    layui.sessionData('data',{key:'ids',value:ids})
+                    parent.layer.open({
+                        title: '审核流程',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin:true,
+                        shadeClose: true,
+                        area: ['1150px', '700px'],
+                        content: '/page/purchaseProcess',
+                        end:function (){
+                            // 判断是否修改成功
+                            if(layui.sessionData('formOk').flag){
+                                layer.msg('汇总成功',{icon:1,time:2000})
+                                table.reload('currentTableId', {page: {curr: 1}})
+                            }
+                        }
+                    });
+                }else{
+                    layer.msg('请勿选中审核中或审核通过的耗材',{icon:2,time:2000,anim:6})
+                }
+            }
+        }
+
+
+
+
+        // 重新审核
+        purchaseMgr.againAll = function (){
+            var res = table.checkStatus('currentTableId')
+            if(res.data.length === 0){
+                layer.msg('请选择内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                // 判断是否可以审核
+                let flag = true;
+                // 将id拼串
+                let ids = ''
+                for(let i = 0;i < res.data.length;i++){
+                    let status = res.data[i].status
+                    ids += res.data[i].purchaseid + ','
+                    if(status === '1' || status === '2'||status==='0'){
+                        flag = false
+                        break;
+                    }
+                }
+                if (flag){
+                    layer.confirm('是否提交？',{icon:3},function (index) {
+                        var loadingIndex = layer.load(1, {
+                            shade: [0.1,'#fff'] //0.1透明度的白色背景
+                        });
+
+                        $.post('/purchase/Redit1',{purchaseid:ids}, function (res) {
+
+                            layer.closeAll("loading");
+
+                            if (res > 0) {
+                                layer.msg('提交成功')
+                                table.reload(purchaseMgr.tableId)
+                            } else {
+                                layer.msg('提交失败', {icon:1, time: 2000})
+                                table.reloda(purchaseMgr.tableId)
+                            }
+                        })
+                    })
+                }else {
+                    layer.msg('请勿选中审核中或审核通过的耗材',{icon:2,time:2000,anim:6})
+                }
+
+            }
+        }
+
+        purchaseMgr.DeleteAll=function(){
+            var res = table.checkStatus('currentTableId')
+            console.log(res)
+            if(res.data.length === 0){
+                layer.msg('请选择内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                // 判断是否可以审核
+                let flag = true;
+                // 将id拼串
+                let ids = ''
+                let  id=""
+                for(let i = 0;i < res.data.length;i++){
+                    alert(res.data[i].status)
+                    let status = res.data[i].status
+                    ids += res.data[i].purchaseid + ','
+                    id+=res.data[i].consumablesid+","
+                    if(status === '1' || status === '2'){
+                        flag = false
+                        break;
+                    }
+                }
+                if (flag){
+                    layer.confirm('是否删除？',{icon:3},function (index) {
+                        $.post('/purchase/deleteALl',{purchaseid:ids,consumablesid:id}, function (res) {
+                            if (res > 0) {
+                                layer.msg('删除成功')
+                                table.reload(purchaseMgr.tableId)
+                            } else {
+                                layer.msg('删除失败', {icon:1, time: 2000})
+                                table.reload(purchaseMgr.tableId)
+                            }
+                        })
+                    })
+                }else {
+                    layer.msg('请勿选中审核中或审核通过的耗材',{icon:2,time:2000,anim:6})
+                }
+
+            }
+        }
+        // 导入实现
+        purchaseMgr.importPurchase = function (){
+            layui.sessionData('import',{key:'flag',value:false})
+            parent.layer.open({
+                title: '导入模板',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['600px', '400px'],
+                content: '/page/purchaseImport',
+                end:function (){
+                    // 判断是否修改成功
+                    if(layui.sessionData('import').flag){
+                        layer.msg('导入成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+        }
+
+        // 导出选中行数据
+        purchaseMgr.exportData = function (){
+            var res = table.checkStatus('currentTableId')
+            if(res.data.length === 0){
+                layer.msg('请选择导出内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                table.exportFile(purchaseMgr.tableId,res.data,'xls')
+            }
+        }
+
+        // 渲染表格
+        table.render({
+            elem: '#' + purchaseMgr.tableId,
+            url: "/purchase/selTeacher",
+            cols: purchaseMgr.initColumn(),
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 50,
+            page: true,
+            skin: 'line',
+            where:{
+                time:purchaseMgr.condition.timeLimit,
+                department:purchaseMgr.condition.department
+            },
+            done:function (res){
+                $("[data-field='id']").css('display','none')
+            }
+        });
+
+
+        // 填充下拉框
+        $.post('/purchase/selList',function (data){
+            var str = '<option value="">材料名称</option>'
+            for (let i = 0; i < data.length; i++) {
+                str += '<option value="' + data[i].no + '">' + data[i].name + ' ' + data[i].standards + '</option>'
+            }
+            // 清除下拉框内容
+            $('#cailiaoname').find('option').remove()
+            // 向下拉框添加内容
+            $('#cailiaoname').append(str)
+            // 重新渲染（layui固定写法）
+            form.render("select")
+        },'json')
+
+        // table事件
+        table.on('tool(currentTableFilter)',function (obj){
+            var data = obj.data
+            if (obj.event === 'edit'){
+                purchaseMgr.editPurchase(data.id,data.consumablesid,data.studentnumber,data.number)
+            }else if(obj.event === 'delete'){
+                purchaseMgr.deletePurchase(data.id)
+            }else if(obj.event === 'delAll'){
+                purchaseMgr.delAllPurchase(data.id,data.purchaseid)
+            }
+            else  if (obj.event=='modify'){
+                layui.sessionData('Radit',{key:'flag',value:false})
+                layui.sessionData('Rdata',{key:'data',value:data})
+                parent.layer.open({
+                    title: '修改',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['600px', '800px'],
+                    content: '/page/purchaseRedit',
+                    end:function (){
+                        // 判断是否修改成功
+                        if(layui.sessionData('Radit').flag){
+                            layer.msg('修改成功',{icon:1,time:2000})
+                            table.reload('currentTableId', {page: {curr: 1}})
+                        }
+                    }
+                });
+            }
+        })
+
+        // 绑定搜索按钮
+        $('#searchBtn').on('click',function (){
+            purchaseMgr.search()
+        })
+        $('#searchBtn').trigger('click')
+        // 绑定采购按钮
+        $('#addBtn').on('click',function (){
+            purchaseMgr.addPurchase($('#department').val())
+        })
+        // 绑定导出按钮
+        $('#exportBtn').on('click',function (){
+            purchaseMgr.exportData()
+        })
+
+        // 绑定汇总按钮
+        $('#summaryBtn').on('click',function (){
+            purchaseMgr.summary()
+        })
+        $('#againAll').on('click',function (){
+            purchaseMgr.againAll()
+        })
+        $("#DeleteAll").on('click',function () {
+              purchaseMgr.DeleteAll()
+        })
+
+        // 导入按钮绑定
+        $('#importBtn').on('click',function (){
+            purchaseMgr.importPurchase();
+        })
+
+        // 时间渲染
+        laydate.render({
+            elem:'#timeLimit',
+            range:true,
+        })
+
+        // // 用于合并单元格
+        // function merge(res) {
+        //     var data = res.data;
+        //     var mergeIndex = 0;//定位需要添加合并属性的行数
+        //     var mark = 1; //这里涉及到简单的运算，mark是计算每次需要合并的格子数
+        //     var columsName = ['purchaseid','name','standards'];//需要合并的列名称
+        //     var columsIndex = [1,2,3];//需要合并的列索引值
+        //
+        //     for (var k = 0; k < columsName.length; k++) { //这里循环所有要合并的列
+        //         var trArr = $(".layui-table-body>.layui-table").find("tr");//所有行
+        //         for (var i = 1; i < res.data.length; i++) { //这里循环表格当前的数据
+        //             var tdCurArr = trArr.eq(i).find("td").eq(columsIndex[k]);//获取当前行的当前列
+        //             var tdPreArr = trArr.eq(mergeIndex).find("td").eq(columsIndex[k]);//获取相同列的第一列
+        //
+        //             if (data[i][columsName[k]] === data[i-1][columsName[k]]) { //后一行的值与前一行的值做比较，相同就需要合并
+        //                 mark += 1;
+        //                 tdPreArr.each(function () {//相同列的第一列增加rowspan属性
+        //                     $(this).attr("rowspan", mark);
+        //                 });
+        //                 tdCurArr.each(function () {//当前行隐藏
+        //                     $(this).css("display", "none");
+        //                 });
+        //             }else {
+        //                 mergeIndex = i;
+        //                 mark = 1;//一旦前后两行的值不一样了，那么需要合并的格子数mark就需要重新计算
+        //             }
+        //         }
+        //         mergeIndex = 0;
+        //         mark = 1;
+        //     }
+        // }
+
+    })
+</script>
+</html>

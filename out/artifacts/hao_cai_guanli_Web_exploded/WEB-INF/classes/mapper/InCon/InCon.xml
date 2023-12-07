@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.inCon.dao.InConDao">
+    <select id="getData" resultType="com.haocai.module.inCon.vo.InConVo" parameterType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select con.id ,con.name,number,price,prices price_z,attribute,type,department,status_z,con_type,standards,review_id,left(in_time,19) as in_time,department_trainmeg conTypeName  from t_consumablesin con left join trainmeg_keep tk on con.con_type_id = tk.id
+        <where>
+            <if test="applicant!=null">applicant=#{applicant}</if>
+            <if test="applicant == null">and status_z = 4</if>
+            <if test="department != null">and department = #{department}</if>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and department_trainmeg like "%"#{conTypeName}"%"</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="startTime!=null">and in_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= in_time</if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+    <select id="getCount" resultType="int" parameterType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select count(*) from t_consumablesin con left join trainmeg_keep tk on con.con_type_id = tk.id
+        <where>
+            <if test="applicant!=null">applicant=#{applicant}</if>
+            <if test="applicant == null">and status_z = 4</if>
+            <if test="department != null">and department = #{department}</if>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and department_trainmeg like "%" #{conTypeName}"%"</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="startTime!=null">and in_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= in_time</if>
+        </where>
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--提交审核功能-->
+        <!--    修改出库表状-->
+    <update id="setConStatus">
+        update  t_consumablesin set status=1 ,status_z=1,review_id=#{review_id} where id=#{id}
+    </update>
+        <!--        添加审核记录-->
+    <insert id="addReview" parameterType="com.haocai.module.inCon.vo.param.InConVoParam">
+        insert into review_table(id,review_id,project_name,re_pe_id,<if test="before_re!=null">before_re,</if> <if test="after_re!=null">after_re,</if><if test="status!=null">status,</if>role)
+        value(#{id},#{review_id},#{project_name},#{roleId},<if test="before_re!=null">#{before_re},</if> <if test="after_re!=null">#{after_re},</if><if test="status!=null">#{status},</if>#{role})
+    </insert>
+
+
+
+    <!--删除-->
+    <delete id="del" parameterType="String">
+        delete from t_consumablesin where id in
+        <foreach collection="array" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="getReviewIds" resultType="com.haocai.module.outCon.vo.OutReviewVo">
+        select id,review_id from t_consumablesin where id in
+        <foreach collection="list" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+    <delete id="delReviewById">
+        delete from review_table where review_id in
+        <foreach collection="list" item="review_id" separator="," open="(" close=")">
+            #{review_id}
+        </foreach>
+    </delete>
+
+
+<!--    获取所有耗材信息-->
+    <select id="getCons" resultType="com.haocai.module.inCon.vo.InConVo">
+        select name,no consumablesid,standards,attribute,type,price from  t_consumableslist
+    </select>
+<!--    手动添加耗材-->
+    <select id="addCon" parameterType="com.haocai.module.inCon.vo.param.InConVoParam" resultType="int">
+        insert into t_consumablesin (id, consumablesid, number, department,  price, name, type, attribute, applicant,con_type,yearin,standards,prices,receipt_no,con_type_id,con_type_no)
+        values ( REPLACE(UUID(),"-",""),#{consumablesid}, #{number}, #{department},  #{price}, #{name}, #{type}, #{attribute}, #{applicant}, #{con_type},#{yearin},#{standards},#{prices},#{receiptNo},#{conTypeId},#{conTypeNo})
+    </select>
+<!--    excel导入耗材信息-->
+    <insert id="excelAddCon" parameterType="java.util.List" >
+        insert into t_consumablesin (id, number, department,  price, name, type, attribute, applicant,con_type,yearin,standards,prices,receipt_no,con_type_id)
+        value
+        <foreach collection="list" item="con" open="(" close=")" separator="),(">
+            REPLACE(UUID(),"-",""), #{con.number}, #{con.department},  #{con.price}, #{con.name}, #{con.type}, #{con.attribute}, #{con.applicant}, #{con.con_type},#{con.yearin},#{con.standards},#{con.prices},#{con.receiptNo},#{con.conTypeId}
+        </foreach>
+    </insert>
+
+    <!--查询库存是否重复-->
+    <select id="selectCon" parameterType="com.haocai.module.inCon.vo.InConVo" resultType="com.haocai.module.inCon.vo.InConVo">
+        select name,price,department from t_consumables where price=#{price} and name=#{name} and department=#{department} and con_type=#{con_type}  and standards=#{standards}
+    </select>
+    <!--修改状态为入库状态-->
+    <update id="setInConStatus" parameterType="com.haocai.module.inCon.vo.InConVo">
+        update  t_consumablesin set status_z=4 where id=#{id}
+    </update>
+    <!--修改库存-->
+    <update id="addConNumber" parameterType="com.haocai.module.inCon.vo.InConVo">
+        update t_consumables set  number=number+#{number} where price=#{price} and name=#{name} and department=#{department} and con_type=#{con_type} and standards=#{standards}
+    </update>
+    <!--添加耗材-->
+    <insert id="inCon" parameterType="com.haocai.module.inCon.vo.InConVo">
+        insert into t_consumables(id,consumablesid,number,department,price,name,attribute,type,con_type,standards,prices) value(REPLACE(UUID(),"-",""),#{consumablesid},#{number},#{department},#{price},#{name},#{attribute},#{type},#{con_type},#{standards},#{price_z})
+    </insert>
+    <select id="getName" resultType="com.haocai.module.system.vo.User">
+        select name from sys_user where user_id=#{roleId}
+    </select>
+    <select id="getTweId" resultType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select re_pe_id as roleId,after_re from review_table where review_id=#{review_id} and status=3
+    </select>
+    <select id="getId" resultType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select re_pe_id as roleId,after_re from review_table where review_id=#{review_id} and status=0
+    </select>
+    <select id="checkConTypeName" resultType="java.lang.String">
+        select id from trainmeg_keep where conType = #{conType} and department_trainmeg = #{conTypeName} limit 1
+    </select>
+</mapper>

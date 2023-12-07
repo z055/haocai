@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.inCon.dao.InConAuditDao">
+    <select id="getData" resultType="com.haocai.module.inCon.vo.InConVo" parameterType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select re.id, con.name, re.review_id , re.project_name,  con.attribute,con.type,con.con_type, re.audit_body,con.applicant, re.status
+        from review_table re inner join t_consumablesin con
+        on re.review_id=con.review_id
+        <where>
+            re.re_pe_id=#{roleId}
+            <if test="status==null"> and re.status is not null</if>
+            <if test="status!=null">and re.status=#{status}</if>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+
+    <select id="getCount" resultType="int" parameterType="com.haocai.module.inCon.vo.param.InConVoParam">
+        select count(*)
+        from review_table re inner join t_consumablesin  con
+        on re.review_id=con.review_id
+        <where>
+            re.re_pe_id=#{roleId}
+            <if test="status==null"> and re.status is not null</if>
+            <if test="status!=null">and re.status=#{status}</if>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+        </where>
+    </select>
+    <!--    根据审核id获取耗材信息-->
+    <select id="getHaoCaiData" parameterType="String" resultType="com.haocai.module.inCon.vo.InConVo">
+        select review_id,name,type,attribute,number,price,prices price_z,con_type,department,standards,con_type_id conTypeId from t_consumablesin
+       <where>
+           review_id=#{review_id}
+       </where>
+    </select>
+    <select id="getHaoCaiDatas" parameterType="java.util.List" resultType="com.haocai.module.inCon.vo.InConVo">
+        select review_id,name,type,attribute,number,price,prices price_z,con_type,department,standards from t_consumablesin
+       <where>
+           <foreach collection="review_id" item="id" open="review_id in(" close=")" separator=",">
+               #{id}
+           </foreach>
+       </where>
+    </select>
+
+
+
+
+    <!--    根据id进行审核-->
+    <update id="setStatusById" parameterType="String">
+        update review_table set status=#{status},audit_body=#{audit_body} where id=#{id}
+    </update>
+    <!--    根据id获取审核信息-->
+    <select id="getDataById" resultType="com.haocai.module.inCon.vo.param.InConVoParam" parameterType="String">
+        select * from review_table where id=#{id}
+    </select>
+    <!--根据审核标号审核人id修改审核状态-->
+    <update id="setStatusByReId">
+        update review_table set status=#{status} where re_pe_id=#{re_pe_id} and review_id=#{review_id}
+    </update>
+
+    <!--    根据审核标号修改申请表的审核状态-->
+    <update id="setStatus" parameterType="String">
+        update t_consumablesin set status=#{status} where review_id=#{review_id} and status_z!=5
+    </update>
+    <!--    根据审核标号修改显示审核状态-->
+    <update id="setShowStatus" parameterType="String">
+        update t_consumablesin set status_z=#{status_z} where review_id=#{review_id}
+    </update>
+
+
+<!--查询库存-->
+    <select id="selectCon" parameterType="com.haocai.module.inCon.vo.InConVo" resultType="String">
+        select id from t_consumables where price=#{price} and name=#{name} and department=#{department} and type = #{type} and con_type=#{con_type} and standards=#{standards} <if test="conTypeId!=null">and con_type_id = #{conTypeId}</if>
+    </select>
+<!--    修改库存-->
+    <update id="addConNumber" parameterType="com.haocai.module.inCon.vo.InConVo">
+        update t_consumables set  number=number+#{number} where id=#{id}
+    </update>
+<!--添加耗材-->
+    <insert id="addCon" parameterType="com.haocai.module.inCon.vo.InConVo">
+        insert into t_consumables(id,number,department,price,name,attribute,type,con_type,standards,prices,con_type_id) value(REPLACE(UUID(),"-",""),#{number},#{department},#{price},#{name},#{attribute},#{type},#{con_type},#{standards},#{price_z},#{conTypeId})
+    </insert>
+    <update id="updateState">
+        update t_consumables set status = 1 where attribute = 2;
+    </update>
+</mapper>

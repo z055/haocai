@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.sbModule.dao.ReviewDao">
+
+    <!--查询当前人员需要审核的数据数量-->
+    <select id="getAllReviewDataCount" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam"
+            resultType="Integer">
+        select count(*) from review_table re inner join t_consumablesborrow con
+        on re.review_id=con.review_id
+        where re.re_pe_id=#{re_pe_id}
+        <if test="status==null">
+            and re.status is not null
+        </if>
+        <if test="status!=null and status!=''">
+            and re.status =#{status}
+        </if>
+        <if test="name!=null and name!=''">
+            and con.name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="attribute!=null and attribute!=''">
+            and con.attribute=#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and con.type=#{type}
+        </if>
+        <if test="department!=null and department!=''">
+            and con.department=#{department}
+        </if>
+        <if test="project_name!=null and project_name!=''">
+            and re.project_name=#{project_name}
+        </if>
+    </select>
+
+    <!--查询当前用户所需要审核的全部数据-->
+    <select id="getAllReviewData" resultType="com.haocai.module.sbModule.vo.ReviewTable"
+            parameterType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        select re.id, re.review_id, re.project_name, re.before_re, re.re_pe_id, re.after_re, re.status, re.role,
+        re.audit_body, con.name, con.department, con.attribute, con.type, con.operator, con.opinion, con.number
+        from review_table re inner join t_consumablesborrow con
+        on re.review_id=con.review_id
+        <where>
+            re.re_pe_id=#{re_pe_id}
+            and re.status is not null
+            <if test="status!=null and status!=''">
+                and re.status =#{status}
+            </if>
+            <if test="name!=null and name!=''">
+                and con.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="attribute!=null and attribute!=''">
+                and con.attribute=#{attribute}
+            </if>
+            <if test="type!=null and type!=''">
+                and con.type=#{type}
+            </if>
+            <if test="department!=null and department!=''">
+                and con.department=#{department}
+            </if>
+            <if test="project_name!=null and project_name!=''">
+                and re.project_name=#{project_name}
+            </if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+
+    <!--    查询审核详情-->
+    <select id="getSbDetailData" resultType="com.haocai.module.sbModule.vo.ReviewTable"
+            parameterType="com.haocai.module.sbModule.vo.ReviewTable">
+        select * from  review_table where  review_id = #{review_id}
+    </select>
+
+    <!--        根据审核编号查-->
+    <select id="getReviewBorrowData" parameterType="com.haocai.module.sbModule.vo.ReviewTable"
+            resultType="com.haocai.module.sbModule.vo.SbVo">
+        select *
+        from t_consumablesborrow
+        where review_id = #{review_id}
+    </select>
+
+
+    <!--审核后修改自己的状态-->
+    <update id="reviewUpdateMe" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        update review_table
+        set status=#{status}
+        where id = #{id}
+    </update>
+
+    <!--审核后修改审核表下一或上一审核员状态-->
+    <update id="reviewUpdateOther" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        update review_table
+        set status=#{status}
+        where re_pe_id = #{re_pe_id}
+          and review_id = #{review_id}
+          and project_name = #{project_name}
+          and role like CONCAT(#{role},'%')
+    </update>
+
+    <!--审核后修改目录表的审核流程状态-->
+    <update id="reviewUpdateConsumListBorrow" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        update t_consumablesborrow set
+        <if test="status_z!=null and status_z!=''">
+            status_z=#{status_z}
+        </if>
+        <if test="status!=null and status_z!=null">
+            ,
+        </if>
+        <if test="status!=null and status!=''">
+            status=#{status}
+        </if>
+        where review_id=#{review_id};
+    </update>
+
+    <!--向目录表添加审核意见-->
+    <update id="addReviewOpinion" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        update t_consumablesborrow
+        set opinion=#{audit_body}
+        where review_id = #{review_id};
+    </update>
+    <!--向审核表添加审核意见-->
+    <update id="addReviewTableOpinion" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        update review_table
+        set audit_body=#{audit_body}
+        where review_id = #{review_id}
+        and role=#{role};
+    </update>
+
+    <select id="showOpinion" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam" resultType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        select project_name, role, audit_body from review_table where review_id=#{review_id};
+    </select>
+
+    <!--    修改出库表审核状态-->
+    <update id="updateOutStatus" parameterType="com.haocai.module.sbModule.vo.ConOut">
+        update t_consumablesout
+        set status_z=#{status_z}
+        where borrow_review_id = #{borrow_review_id}
+    </update>
+
+    <select id="selectNameByAccount" parameterType="string" resultType="string">
+        select name from sys_user where account = #{operator};
+    </select>
+
+    <select id="selectNameByUserId" parameterType="string" resultType="string">
+        select name from sys_user where user_id = #{re_pe_id}
+    </select>
+
+    <select id="getStatus" parameterType="com.haocai.module.sbModule.vo.param.ReviewParam" resultType="string">
+        select status from review_table where role = #{role} and review_id = #{review_id} and project_name = #{project_name};
+    </select>
+</mapper>

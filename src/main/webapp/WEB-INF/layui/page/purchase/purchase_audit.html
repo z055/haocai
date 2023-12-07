@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <title>采购审核</title>
+</head>
+<style>
+    #opinionTable{
+        border-collapse: collapse;
+    }
+    #opinionTable tr td,th{
+        border: 1px solid #ccc;
+    }
+</style>
+<body>
+<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+<table id="opinionTable">
+    <tr style="height: 80px;">
+        <td colspan="4" style="height: 80px;text-align: center">审核意见：</td>
+        <td><textarea name="opinion" id="opinion" class="layui-textarea" style="width: 660px;height: 80px;resize: none"></textarea></td>
+    </tr>
+</table>
+<div class="layui-container" style="display: flex;justify-content: space-around;margin-top: 10px;">
+    <div class="layui-row">
+        <button id="passBtn" type="button" class="layui-btn layui-btn-normal">审核通过</button>
+        <button id="backBtn" type="button" class="layui-btn layui-btn-normal">审核退回</button>
+        <button id="exportBtn" type="button" class="layui-btn layui-btn-normal">导出详情</button>
+    </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js"></script>
+<script>
+  layui.use(['form', 'table','excel','layer'], function () {
+    var $ = layui.jquery,
+        form = layui.form,
+        table = layui.table,
+        excel = layui.excel,
+        layer = layui.layer
+    var purchaseid = layui.sessionData('audit')['purchaseid']
+      // 通过按钮
+      $('#passBtn').on('click',function (){
+          $.post('/purchase/shenhe',
+              {purchaseid:purchaseid,opinion:$('#opinion').val()},
+              function (data){
+              if (data > 0){
+                  layui.sessionData('formOk',{key:'flag',value:true})
+              }
+              parent.layer.close(parent.layer.index)
+          })
+      })
+
+      // 退回按钮
+      $('#backBtn').on('click',function (){
+          $.post('/purchase/shenhetuihui',
+              {purchaseid:purchaseid,opinion:$('#opinion').val()},
+              function (data){
+              if (data > 0){
+                  layui.sessionData('formOk',{key:'flag',value:true})
+              }
+              parent.layer.close(parent.layer.index)
+          })
+      })
+
+      // 导出详情
+      $('#exportBtn').on('click',function (){
+          $.post('/purchase/selAll',
+              {purchaseid:purchaseid},
+              function (res){
+            res.unshift({consumablesid: '耗材编号',name: '耗材名称',standards:'耗材规格', attribute: '耗材属性',type:'耗材类别',price:'价格',number:'耗材数量',studentnumber:'学生数量',department:'二级学院',operator:'操作员',operatordate:'录入时间',opinion:'审核意见'});
+              var data = excel.filterExportData(res, [
+                  'consumablesid', 'name', 'standards', 'attribute', 'type', 'price', 'number', 'studentnumber', 'department', 'operator', 'operatordate', 'opinion'
+              ]);
+              excel.exportExcel({
+                  sheet1:data
+              },'采购详情.xlsx','xlsx')
+              layer.msg("导出详情成功",{icon:1,time:2000})
+          },'json')
+      })
+
+      // 查询所有审核意见
+      $.post('/purchase/yijian',{purchaseid:purchaseid},
+          function (res){
+          let str = ''
+          for (let i = 0; i < res.length; i++) {
+              str += '<tr style="text-align: center">\n' +
+                     '    <td colspan="4">' + res[i]["auditorname"] + '的审核意见：</td>\n' +
+                     '    <td>' + res[i]["opinion"] + '</td>\n' +
+                     '</tr>'
+          }
+          $('#opinionTable tr:not(:first)').remove()
+          $('#opinionTable').append(str)
+      },'json')
+
+      // 渲染表格
+      table.render({
+          elem: '#currentTableId',
+          url: "/purchase/shenhepage",
+          cols: [[
+              {type: "checkbox", width: 50,totalRowText:'合计'},
+              {field: 'attribute', minWidth: 130, title: '耗材属性', sort: true,templet:function(res){
+                  let color = res.attribute === '低值易耗品' ? '#00ff4a' : '#006fff'
+                  return '<span style="color: ' + color + '">' + res.attribute + '</span>'
+              }},
+              {field: 'totalstudent', minWidth: 120, title: '学生数量', sort: true,totalRow:'{{ d.TOTAL_NUMS }}人'},
+              {field: 'totalprice', minWidth: 120, title: '所需金额', sort: true,totalRow:'{{ d.TOTAL_NUMS }}元'},
+          ]],
+          totalRow:true,
+          skin: 'line',
+          where:{
+              purchaseid:purchaseid
+          }
+      });
+
+  })
+</script>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <title>采购记录</title>
+</head>
+<body>
+<div class="layuimini-container">
+  <fieldset class="table-search-fieldset">
+    <legend>搜索信息</legend>
+    <div style="margin: 10px 10px 10px 10px">
+      <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+             <label class="layui-form-label">二级学院</label>
+             <div class="layui-input-block">
+               <select id="department" name="department" class="layui-input">
+               </select>
+             </div>
+          </div>
+          <div class="layui-inline">
+            <input id="timeLimit" class="layui-input" type="text" name="timeLimit" placeholder="导入时间"/>
+          </div>
+          <div class="layui-inline">
+            <button type="button" id="searchBtn" class="layui-btn layui-btn-normal"><i class="layui-icon"></i> 搜 索</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </fieldset>
+  <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+  layui.use(['form', 'table', 'laydate'], function () {
+    var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate;
+
+    var purchaseLogs = {
+      tableId:'currentTableId',
+      condition:{
+        department:'',
+        timeLimit:''
+      }
+    }
+
+    // 初始化表格列
+    purchaseLogs.initColumn = function (){
+      return [[
+        {type: "checkbox"},
+        {field: 'name', title: '耗材名称', sort: true},
+        {field: 'standards', title: '耗材规格', sort: true},
+        {field: 'price', title: '耗材单价', sort: true},
+        {field: 'number', title: '耗材数量', sort: true},
+        {field: 'department', title: '二级学院', sort: true},
+        {field: 'operatordate', title: '录入时间', sort: true},
+        {field: 'operator', title: '录入账号', sort: true},
+        // {title: '操作', minWidth: 220, toolbar: '#currentTableBar', align: "center", fixed: 'right',}
+      ]];
+    }
+
+    // 查询记录
+    purchaseLogs.search = function (){
+      var queryData = {}
+      queryData['timeLimit'] = $('#timeLimit').val()
+      queryData['department'] = $('#department').val()
+      table.reload(purchaseLogs.tableId,{
+        where:queryData,page:{curr:1}
+      })
+    }
+
+    // 初始化表格
+    table.render({
+      elem: '#' + purchaseLogs.tableId,
+      url: "/purchase/selpurchaseall",
+      cols: purchaseLogs.initColumn(),
+      limits: [10, 15, 20, 25, 50, 100],
+      limit: 10,
+      page: true,
+      skin: 'line',
+      cellMinWidth: 100,
+      where:{
+        timeLimit:purchaseLogs.condition.timeLimit,
+        department:purchaseLogs.condition.department
+      }
+    });
+
+    // 获取部门
+    $.ajax({
+      url:'/dept/findDeptToSelect',
+      dataType:'json',
+      type:'post',
+      async:false,
+      success:function (res){
+        var str = '<option value="">所有二级学院</option>'
+        for (let i = 0; i < res.length; i++) {
+          str += '<option value="' + res[i]['full_name'] + '">' + res[i]['full_name'] + '</option>'
+        }
+        $('#department option').remove()
+        $('#department').append(str)
+        form.render('select')
+      }
+    })
+
+    // 渲染时间
+    laydate.render({
+        elem: '#timeLimit'
+        ,range: true
+    });
+
+    // 绑定搜索按钮
+    $('#searchBtn').on('click',function (){
+      purchaseLogs.search()
+    })
+  })
+</script>
+</html>

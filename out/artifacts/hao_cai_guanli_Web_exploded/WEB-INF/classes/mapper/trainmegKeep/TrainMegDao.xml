@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.trainmegKeep.dao.TrainMegDao">
+    <!--    添加大赛、实训维护数据-->
+    <insert id="insertTrainMeg" parameterType="com.haocai.module.trainmegKeep.vo.TrainMeg">
+        insert into trainmeg_keep(id, department_trainmeg, conType, principal, account)
+            value (#{id}, #{depTrainMeg}, #{conType}, #{principal}, #{account})
+    </insert>
+
+    <select id="selectNameByAccount" parameterType="string" resultType="string">
+        select name as principal
+        from sys_user
+        where account = #{account}
+    </select>
+    <select id="selectTrainMeg" parameterType="com.haocai.module.trainmegKeep.vo.TrainMeg"
+            resultType="com.haocai.module.trainmegKeep.vo.TrainMeg">
+        select id,department_trainmeg as depTrainMeg, conType, principal, account from trainmeg_keep
+        <where>
+            <if test="department!=null">and department_trainmeg like #{department}"%"</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%"</if>
+            <if test="principal!=null">and principal like CONCAT('%', #{principal}, '%')</if>
+            <if test="conType!=null">and conType = #{conType}</if>
+        </where>
+        limit
+        #{page},#{limit}
+    </select>
+
+    <select id="selectTrainMegCount" parameterType="com.haocai.module.trainmegKeep.vo.TrainMeg"
+            resultType="integer">
+        select count(*) from trainmeg_keep
+        <where>
+            <if test="department!=null">and department_trainmeg like #{department}"%"</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%"</if>
+            <if test="principal!=null">and principal like CONCAT('%', #{principal}, '%')</if>
+            <if test="conType!=null">and conType = #{conType}</if>
+        </where>
+    </select>
+
+    <delete id="deleteTrainMegById" parameterType="string">
+        delete
+        from trainmeg_keep
+        where id = ${id}
+    </delete>
+    <update id="updateTrainMegById" parameterType="com.haocai.module.trainmegKeep.vo.TrainMeg">
+        update trainmeg_keep
+        <set>
+            <if test="department!=null||name!=null">department_trainmeg = #{depTrainMeg},</if>
+            <if test="conType!=null">conType = #{conType},</if>
+        </set>
+        where id = #{id}
+    </update>
+    <select id="selectDepTrainMegByDep" parameterType="string"
+            resultType="string">
+        select department_trainmeg as depTrainMeg from trainmeg_keep
+        where department_trainmeg = #{depTrainMeg};
+    </select>
+
+</mapper>

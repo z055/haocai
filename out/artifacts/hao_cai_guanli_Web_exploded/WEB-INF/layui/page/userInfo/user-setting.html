@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>基本资料</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <style>
+        .layui-form-item .layui-input-company {width: auto;padding-right: 10px;line-height: 38px;}
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <div class="layui-form layuimini-form" lay-filter="userInfoFilter">
+            <input type="hidden" id="userId" name="userId">
+            <div class="layui-form-item">
+                <label class="layui-form-label required">管理账号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="account" lay-verify="required" lay-reqtext="管理账号不能为空" placeholder="请输入管理账号" class="layui-input layui-disabled" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="sex" value="M" title="男">
+                    <input type="radio" name="sex" value="F" title="女" checked>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required">姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" lay-verify="required" lay-reqtext="姓名不能为空" placeholder="请输入姓名" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">出生日期</label>
+                <div class="layui-input-block">
+                    <input type="text" id="birthday" name="birthday" placeholder="请输入出生日期" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label required">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="email" name="email" lay-verify="required" lay-reqtext="邮箱不能为空" placeholder="请输入邮箱" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">手机</label>
+                <div class="layui-input-block">
+                    <input type="number" name="phone" placeholder="请输入手机"  value="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['form','layer','laydate'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            $ = layui.jquery,
+            currentUser = layui.sessionData('userInfo').user
+
+        // 初始化用户基本信息
+        $.post('/user/getUserInfo',{userId:currentUser.userId},function (data){
+            form.val('userInfoFilter',{
+                'account':data.account,
+                'birthday':data.birthday,
+                'email':data.email,
+                'name':data.name,
+                'phone':data.phone,
+                'sex':data.sex,
+                'userId':currentUser.userId
+            })
+        },'json')
+
+        //监听提交
+        form.on('submit(saveBtn)', function (obj) {
+            var data = obj.field
+            $.ajax({
+                url:'/user/changeUserInfo',
+                type:'post',
+                data:JSON.stringify(data),
+                contentType:'application/json',
+                dataType:'json',
+                success:function (res){
+                    if(res > 0){
+                        layer.msg('修改成功',{icon:1,time:1000}, function () {
+                            parent.layer.close(parent.layer.index)
+                        });
+                    }else{
+                        layer.msg('修改失败',{icon:2,time:1000});
+                    }
+                }
+            })
+            return false;
+        });
+
+        laydate.render({elem:'#birthday'})
+    });
+</script>
+</body>
+</html>

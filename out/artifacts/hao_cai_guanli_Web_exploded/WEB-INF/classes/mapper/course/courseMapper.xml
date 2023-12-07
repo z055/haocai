@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.course.dao.CourseMapper">
+
+    <!--获取课程管理表所有数据-->
+    <select id="getAllCourse" parameterType="com.haocai.module.course.param.CourseParam" resultType="com.haocai.module.course.vo.Course">
+        select * from t_course where 1=1
+        <if test="condition!=null and condition!=''">
+            and(name like CONCAT('%',#{condition},'%')
+            or training like CONCAT('%',#{condition},'%'))
+        </if>
+        <if test="department!=null and department!=''">
+            and department=#{department}
+        </if>
+        <if test="major!=null and major!=''">
+            and major=#{major}
+        </if>
+        <if test="userAccount!=null and userAccount!=''">
+            and userAccount=#{userAccount}
+        </if>
+        order by operatordate desc limit #{page},#{limit}
+    </select>
+
+    <!--按条件查询数据总数-->
+    <select id="queryCourseCount" parameterType="com.haocai.module.course.param.CourseParam" resultType="Integer">
+        select count(*) from t_course where 1 = 1
+        <if test="condition!=null and condition!=''">
+            and(name like CONCAT('%',#{condition},'%')
+            or training like CONCAT('%',#{condition},'%'))
+        </if>
+        <if test="department!=null and department!=''">
+            and department=#{department}
+        </if>
+        <if test="major!=null and major!=''">
+            and major=#{major}
+        </if>
+        <if test="userAccount!=null and userAccount!=''">
+            and userAccount=#{userAccount}
+        </if>
+    </select>
+    <!--添加数据-->
+    <insert id="addCourse" parameterType="com.haocai.module.course.vo.Course">
+        insert into t_course (id,no,department,major,name,training,operator,operatordate,mark,operatorname,classhour,userAccount) values(#{id},#{no},#{department},#{major},#{name},#{training},#{operator},#{operatordate},#{mark},#{operatorname},#{classhour},#{userAccount})
+    </insert>
+
+    <!--添加数据查询专业-->
+    <select id="addSelectMajor" parameterType="com.haocai.module.course.vo.ZhuanYe" resultType="com.haocai.module.course.vo.ZhuanYe">
+        select * from zhuanye where department=#{department}
+    </select>
+
+    <!--查询全部专业-->
+    <select id="selectAllMajor" resultType="com.haocai.module.course.vo.ZhuanYe">
+        select * from zhuanye
+    </select>
+
+    <!--查重数据-->
+    <select id="addRecheck" parameterType="com.haocai.module.course.vo.Course" resultType="com.haocai.module.course.vo.Course">
+        select * from t_course where major=#{major} and name=#{name} and department=#{department} and training=#{training}
+    </select>
+
+    <!--查询学院下是否存在该专业-->
+    <select id="selectDepartmentMajor" parameterType="com.haocai.module.course.vo.Course" resultType="int">
+        select count(*) from zhuanye where department=#{department} and name=#{major}
+    </select>
+
+
+    <!--修改数据-->
+    <update id="updateCourse" parameterType="com.haocai.module.course.vo.Course">
+        update t_course set department=#{department},major=#{major},name=#{name},training=#{training},classhour=#{classhour},operator=#{operator},operatordate=#{operatordate},operatorname=#{operatorname} where id=#{id}
+    </update>
+
+    <!--修改数据单独查询渲染-->
+    <select id="updateData" parameterType="com.haocai.module.course.vo.Course" resultType="com.haocai.module.course.vo.Course">
+        select * from t_course where id=#{id}
+    </select>
+
+    <!--删除数据-->
+    <delete id="deleteCourse" parameterType="com.haocai.module.course.vo.Course">
+        delete from t_course where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="deleteSelectData" parameterType="com.haocai.module.course.param.CourseParam">
+        delete from t_course
+        where id in
+        <foreach collection="arrIds" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--查询数据总数-->
+    <select id="getCourseCount" resultType="Integer">
+        select count(*) from t_course
+    </select>
+
+    <!--模糊查询-->
+    <select id="queryCourseDate" parameterType="com.haocai.module.course.param.CourseParam" resultType="com.haocai.module.course.vo.Course">
+        select * from t_course where 1 = 1
+        <if test="condition!=null and condition!=''">
+            and(name like CONCAT('%',#{condition},'%')
+            or training like CONCAT('%',#{condition},'%'))
+        </if>
+        <if test="department!=null and department!=''">
+            and department=#{department}
+        </if>
+        limit #{page},#{limit}
+    </select>
+
+
+
+    <!--Excel导出数据-->
+    <select id="courseExcelExport" parameterType="com.haocai.module.course.param.CourseParam" resultType="com.haocai.module.course.vo.Course">
+        SELECT * FROM t_course
+        <if test="ids!=null">
+            where id in
+            <foreach collection="ids" item="ids" open="(" close=")" separator="," >
+                #{ids}
+            </foreach>
+        </if>
+    </select>
+
+
+</mapper>

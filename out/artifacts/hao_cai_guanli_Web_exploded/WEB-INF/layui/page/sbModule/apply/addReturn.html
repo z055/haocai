@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <title>提交归还申请弹窗</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <input type="text" id="consumablesid" value="" name="consumablesid" hidden>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="consumableName" name="consumableName" lay-verify="required" lay-reqtext="耗材名称"
+                   placeholder="耗材名称" value="" class="layui-input layui-disabled" readonly="true">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材归还数量</label>
+        <div class="layui-input-block">
+            <input type="text" id="number" name="number" lay-verify="required" lay-reqtext="耗材数量" placeholder="耗材数量"
+                   value="" class="layui-input layui-disabled" readonly="true">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材单价</label>
+        <div class="layui-input-block">
+            <input type="text" id="price" name="price" lay-verify="required" lay-reqtext="耗材单价" placeholder="耗材单价"
+                   value="" class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材属性</label>
+        <div class="layui-input-block">
+            <input type="text" id="attribute" name="attribute" lay-verify="required" lay-reqtext="耗材属性"
+                   placeholder="耗材属性" value="" class="layui-input layui-disabled" readonly="true">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材类型</label>
+        <div class="layui-input-block">
+            <input type="text" id="type" name="type" lay-verify="required" lay-reqtext="耗材类型" placeholder="耗材类型"
+                   value="" class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">规格</label>
+        <div class="layui-input-block">
+            <input type="text" id="standards" name="standards" lay-verify="required" lay-reqtext="库类别" placeholder="库类别"
+                   value="" class="layui-input layui-disabled" readonly="true">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">所属学院</label>
+        <div class="layui-input-block">
+            <input type="text" id="department" name="department" lay-verify="required" lay-reqtext="所属学院"
+                   placeholder="所属学院" value="" class="layui-input layui-disabled" readonly="true">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">库类别</label>
+        <div class="layui-input-block">
+            <input type="text" id="conType" name="conType" lay-verify="required" lay-reqtext="库类别" placeholder="库类别"
+                   value="" class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label required">出库类别</label>
+        <div class="layui-input-block">
+            <input type="text" id="out_type" name="out_type" lay-verify="required" lay-reqtext="出库类型" placeholder="出库类型"
+                   value="3" class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label required">耗材id</label>
+        <div class="layui-input-block">
+            <input type="text" id="id" name="id" lay-verify="required" lay-reqtext="" placeholder="" value="1"
+                   class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item" hidden>
+        <label class="layui-form-label required">审核项目名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="project_name" name="project_name" lay-verify="required" lay-reqtext="" placeholder=""
+                   value="归还审核" class="layui-input layui-disabled" readonly="true">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">专业负责人</label>
+        <div class="layui-input-block">
+            <select id="role1" name="role1" lay-verify="required" lay-reqtext="请选择" placeholder="请选择" lay-search>
+
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">二级学院管理员</label>
+        <div class="layui-input-block">
+            <select id="role2" name="role2" lay-verify="required" lay-reqtext="请选择" placeholder="请选择" lay-search>
+
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">二级学院教学副院长</label>
+        <div class="layui-input-block">
+            <select id="role3" name="role3" lay-verify="required" lay-reqtext="请选择" placeholder="请选择" lay-search>
+
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">库管员</label>
+        <div class="layui-input-block">
+            <select id="role4" name="role4" lay-verify="required" lay-reqtext="请选择" placeholder="请选择" lay-search>
+
+            </select>
+        </div>
+    </div>
+  <div class="layui-form-item" hidden>
+    <label class="layui-form-label required">审核id</label>
+    <div class="layui-input-block">
+      <input type="text" id="review_id" name="review_id" lay-verify="required" lay-reqtext="" placeholder=""
+             value="" class="layui-input layui-disabled" readonly="true">
+    </div>
+  </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="updateSubmitBtn">提交归还申请</button>
+        </div>
+    </div>
+
+</div>
+</body>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+        var data = layui.sessionData("returnData").data
+        //获取审核人信息
+        $.ajax({
+            url: '/user/getUserByRoleName?roleName=' + "专业负责人" + "&department="+data.department,
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#role1").append(str)
+                }
+                form.render('select')
+            }
+        })
+        $.ajax({
+            url: '/user/getUserByRoleName?roleName=' + "二级学院管理员" + "&department="+data.department,
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#role2").append(str)
+                }
+                form.render('select')
+            }
+        })
+        $.ajax({
+            url: '/user/getUserByRoleName?roleName=' + "二级学院教学副院长" + "&department="+data.department,
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#role3").append(str)
+                }
+                form.render('select')
+            }
+        })
+        $.ajax({
+            url: '/user/getUserByRoleName?roleName=' + "二级学院教学院长" + "&department="+data.department,
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#role3").append(str)
+                }
+                form.render('select')
+            }
+        })
+        $.ajax({
+            url: '/user/getUserByRoleName?roleName=' + "库管员" + "&department="+data.department,
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#role4").append(str)
+                }
+                form.render('select')
+            }
+        })
+        switch (data.conType) {
+            case '1':
+                data.conType = '技能大赛'
+                break
+            case '2':
+                data.conType = '生产实训'
+                break
+            case '3':
+                data.conType = '基本技能'
+                break
+            case '4':
+                data.conType =  '设备维护保养';
+                break
+        }
+        data.review_id = data.review_id;
+        switch (data.attribute) {
+            case '1':
+                data.attribute = '低值易耗品';
+                break
+            case '2':
+                data.attribute = '低值耐用品';
+                break
+        }
+        switch (data.type) {
+            case '1':
+                data.type = '酒店食品';
+                break
+            case '2':
+                data.type = '金属材料';
+                break
+            case '3':
+                data.type = '电子电器';
+                break
+            case '4':
+                data.type = '建筑材料';
+                break
+            case '5':
+                data.type = '服装服饰';
+                break
+            case '6':
+                data.type = '文化绘画';
+                break
+            case '7':
+                data.type = '工作仪表';
+                break
+            case '8':
+                data.type = '化工药品';
+                break
+            case '9':
+                data.type = '气体类';
+                break
+            case '10':
+                data.type = '维修保养';
+                break
+            case '11':
+                data.type = '其他';
+                break
+        }
+
+        console.log("aaaaaaaaaaaaaaaa" + data.review_id);
+        $("#consumablesid").val(data.consumablesid);
+        $("#review_id").val(data.review_id);
+        $("#consumableName").val(data.name);
+        $("#number").val(data.number);
+        $("#price").val(data.price);
+        $("#attribute").val(data.attribute);
+        $("#type").val(data.type);
+        $("#conType").val(data.con_type);
+        $("#department").val(data.department);
+        $("#standards").val(data.standards)
+        $("#id").val(data.id)
+        //监听提交
+        var AddSwitch = true;
+
+        form.on('submit(updateSubmitBtn)', function (data) {
+            var sendData = data.field
+            var el = $(this);
+
+            if (sendData.role1 == '' || sendData.role2 == "" || sendData.role3 == "" || sendData.role4 == "") {
+                layer.msg('请选择审核人', {icon: 2, time: 1000,})
+                return false
+            } else {
+                if (AddSwitch) {
+                    AddSwitch = false;
+                    updateReviewTOw(sendData)
+                }
+            }
+        });
+
+        function updateReviewTOw(sendData) {
+            $.ajax({
+                url: "/sbController/addGiveBack",
+                type: "post",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(sendData),
+                success: function (res) {
+                    AddSwitch = true;
+
+                    if (res.message == "success") {
+                        var iframeIndex = parent.layer.getFrameIndex(window.name);
+                        parent.layer.msg("请在外借管理页面查看归还信息", {icon: 1})
+                        parent.layer.close(iframeIndex);
+                    } else {
+                        layer.msg(res.message, {icon: 2, time: 1000,})
+                    }
+                }
+            })
+        }
+    });
+</script>
+</html>

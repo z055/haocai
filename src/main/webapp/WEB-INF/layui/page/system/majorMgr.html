@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label" style="width: 140px;">&nbsp; 专业名称 &nbsp;</label>
+                            <div class="layui-input-inline">
+                                <input id="condition" type="text" name="condition" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-normal"  lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                            <button type="submit" class="layui-btn layui-btn-normal"  lay-submit lay-filter="data-add-btn"><i class="layui-icon layui-icon-addition"></i> 添 加 </button>
+                            <button type="submit" class="layui-btn layui-btn-normal"  lay-submit lay-filter="data-export-btn"><i class="layui-icon layui-icon-export"></i> 导 出 </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">修改</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+
+
+<script>
+
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table
+
+        table.render({
+            elem: '#currentTableId',
+            url: '/zhuanye/queryZhuanye?condition=',
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'zhuanyeid', width: 200, title: '专业id', sort: true},
+                {field: 'name', width: 200, title: '专业名称', sort: true},
+                {field: 'bianhao', width: 200, title: '专业编号', sort: true},
+                {field: 'department', width: 200, title: '所属部门', sort: true,},
+                {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center", fixed: 'right',}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 10,
+            page: true,
+            skin: 'line'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            tableReload(data.field.condition)
+            return false;
+        });
+
+        //监听添加操作
+        form.on('submit(data-add-btn)', function () {
+            var index = layer.open({
+                title: '添加专业',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['50%', '100%'],
+                content: '/zhuanye/major_add',
+                end: function () {
+                    var addFlag = layui.sessionData('addFlag')
+                    if (addFlag.flag) {
+                        tableReload("")
+                    }
+                }
+            });
+            return false;
+        });
+
+        form.on('submit(data-export-btn)', function () {
+            return false;
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        //监听操作栏
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            console.log(data)
+            layui.sessionData("major", {
+                key:'data',
+                value:data
+            })
+            if (obj.event === 'edit') {
+                layer.open({
+                    title: '编辑用户',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['50%', '100%'],
+                    content: '/zhuanye/major_edit',
+                    end: function () {
+                        var addFlag = layui.sessionData('addFlag')
+                        if (addFlag.flag) {
+                            tableReload("")
+                        }
+                    }
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                (layer.confirm('真的删除行么', function (index) {
+                    console.log(data);
+                    $.ajax({
+                        url: '../zhuanye/deleteMajor',
+                        data:{id:data.zhuanyeid},
+                        dataType: 'json',
+                        success: function (res) {
+                            if (res.count == 1) {
+                                tableReload("")
+                            }
+                            layer.msg(res.msg,{icon: res.count})
+                        }
+                    })
+                    layer.close(index);
+                }));
+            }
+        });
+
+        function tableReload(data) {
+            table.reload("currentTableId", {
+                url: '/zhuanye/queryZhuanye',
+                method: 'post',
+                where : {
+                    condition: data
+                },
+                page: {
+                    curr: 1
+                }
+            })
+        }
+
+    })
+</script>
+
+</body>
+</html>

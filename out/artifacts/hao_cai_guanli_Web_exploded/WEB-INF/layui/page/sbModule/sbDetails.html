@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>审核详情弹窗</title>
+</head>
+<style>
+
+</style>
+<body>
+<div class="layuimini-container">
+    <table class="layui-hide" id="demo" lay-filter="currentTableFilter"></table>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+        var data = layui.sessionData("returnData").data
+        var CheckedMgr = {
+            tableId: 'demo'
+        }
+        // 表格渲染
+        tableInit()
+
+        function tableInit() {
+            table.render({
+                elem: '#' + CheckedMgr.tableId
+                ,
+                height: 500
+                ,
+                url: '/sbModuleReview/getDetail' //数据接口
+                ,
+                where: {
+                    "review_id": data.review_id,
+                }
+                ,
+                title: '审核详情'
+                ,
+                totalRow: true //开启合计行
+                ,
+                cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    , {field: 'id', title: 'ID', hide: 'true'}
+                    , {field: 'review_id', title: '审核编号', hide: 'true'}
+                    , {field: 'role', title: '审核人角色'}
+                    , {field: 'operator', title: '审核人姓名'}
+                    , {field: 'project_name', title: '审核类型'}
+                    , {field: 'status', title: '审核状态',
+                        templet: function (res) {
+                            switch (res.status) {
+                                case '0':
+                                    return '待审核';
+                                case '1':
+                                    return '审核通过';
+                                case '2':
+                                    return '退回';
+                                case '1':
+                                    return '被退回';
+                                default:
+                                    return '';
+                            }
+                        }
+                    }
+                ]]
+            });
+        }
+    });
+</script>
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <title>审核</title>
+</head>
+<style>
+    #opinionTable{
+        border-collapse: collapse;
+        margin-left: 80px;
+    }
+    #opinionTable tr td,th{
+        border: 1px solid #ccc;
+    }
+</style>
+<body>
+
+<table class="layui-hide" id="demo" lay-filter="test"></table>
+<span class="layui-layer-shad"></span>
+<table id="opinionTable">
+    <tr style="height: 80px;" id="option">
+        <td colspan="4" style="height: 80px;text-align: center">审核意见：</td>
+        <td><textarea name="opinion" id="opinion" class="layui-textarea" style="width: 660px;height: 80px;resize: none"></textarea></td>
+
+    </tr>
+</table>
+<div class="layui-container" style="display: flex;justify-content: space-around;margin-top: 10px;">
+    <div class="layui-row">
+        <button id="passBtn" type="button" class="layui-btn layui-btn-normal">审核通过</button>
+        <button id="backBtn" type="button" class="layui-btn layui-btn-normal">审核退回</button>
+    </div>
+</div>
+</body>
+<script src="../../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        //得到各种内置组件
+        var layer = layui.layer //弹层
+            ,laypage = layui.laypage //分页
+            ,table = layui.table //表格
+            ,form=layui.form
+            ,util = layui.util;
+        var consumList = {
+            tableId:'demo',
+        }
+        //获取url传递的参数
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return (r[2]); return null;
+
+        }
+        var purchaseid=GetQueryString("purchaseid");
+        var status=GetQueryString("status")
+        var statu=GetQueryString("statu")
+        function initTable() {
+            //执行一个 table 实例
+            //渲染表格初始化
+            table.render({
+                elem: '#demo'
+                ,height: 350
+                ,url: '/purchase/pShenHe?purchaseid='+purchaseid //数据接口
+                ,title: '审核'
+                ,page: false //开启分页
+                ,totalRow: false //开启合计行
+                ,cols: [[ //表头
+                    {field: 'no', width: 160,title: '耗材编号',hide:true},
+                    {field: 'name', width: 105, title: '耗材名称', sort: true},
+                    {field: 'standards', width: 105, title: '耗材规格', sort: true},
+                    {field: 'attribute', width: 105, title: '耗材属性', sort: true},
+                    {field: 'price', width: 105, title: '耗材单价', sort: true},
+                    {field: 'attribute', width: 130, title: '耗材属性', sort: true,templet:function(res){
+                            let color = res.attribute === '低值易耗品' ? '#00ff4a' : '#006fff'
+                            return '<span style="color: ' + color + '">' + res.attribute + '</span>'
+                        }},
+                    {field: 'studentnumber', width: 105, title: '学生数量', sort: true},
+                    {field: 'opinion', width: 105, title: '审核意见', sort: true},
+                    {field: 'operatorname', width: 120, title: '操作员姓名', sort: true},
+                ]]
+            });
+        }
+        //初始化表格
+        initTable();
+        //审核通过
+        //加载样式
+
+
+        consumList.reviewPass=function (){
+            console.log(status)
+            if (status==3||status.indexOf("3")!=-1){
+                layer.msg("当前记录已经被驳回无法审核通过",{
+                    icon:5,
+                    shift:6
+                })
+                return
+            }
+            var sendData={"pShenId":purchaseid,"opinion":$("#opinion").val()}
+            //加载样式
+            $.ajaxSetup({
+                beforeSend: function () {
+                    layui.use('layer', function () {
+                        layui.layer.load();
+                        $(".layui-layer-shade").css('background', '#000000')
+                        $(".layui-layer-shade").css('opacity', '0.2')
+                    });
+                },
+            });
+
+
+            console.log(JSON.stringify(sendData))
+
+            $.ajax({
+                url:"/purchase/PshenPass",
+                type:"post",
+                contentType:"application/json",
+                dataType:"json",
+                data: JSON.stringify(sendData),
+                success:function(data){
+                    var  index = layui.layer.load();
+                    layer.msg(data.message,{
+                        icon:1,
+                    })
+                    layui.sessionData('PshenHe', {key: 'flag', value: true})
+                    parent.layer.close(parent.layer.index);
+                },
+            })
+        }
+        //审核通过按钮绑定
+        $("#passBtn").on("click",function (){
+            consumList.reviewPass();
+        })
+
+        //审核退回
+        consumList.reviewBack=function (){
+            var sendData={"pShenId":purchaseid,"opinion":$("#opinion").val()}
+            if (!$("#opinion").val()){
+                layer.msg("请输入审核意见",{
+                    icon:5,
+                    shift:6
+                })
+                return
+            }
+
+            //加载样式
+            $.ajaxSetup({
+                beforeSend: function () {
+                    layui.use('layer', function () {
+                        layui.layer.load();
+                        $(".layui-layer-shade").css('background', '#000000')
+                        $(".layui-layer-shade").css('opacity', '0.2')
+                    });
+                },
+            });
+
+            $.ajax({
+                url:"/purchase/PshenBack",
+                type:"post",
+                contentType:"application/json",
+                dataType:"json",
+                data: JSON.stringify(sendData),
+                success:function(data){
+                    var  index = layui.layer.load();
+                    layer.msg(data.message,{
+                        icon:1,
+                    })
+                    layui.sessionData('PshenHe', {key: 'flag', value: true})
+                    parent.layer.close(parent.layer.index);
+                },
+            })
+        }
+        //退回按钮绑定
+        $("#backBtn").on("click",function (){
+            consumList.reviewBack();
+        })
+    })
+</script>
+</html>

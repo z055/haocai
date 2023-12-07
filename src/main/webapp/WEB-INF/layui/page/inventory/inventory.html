@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>库存盘点</title>
+</head>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input type="text" required lay-verify="required" placeholder="请输耗材名称" autocomplete="off" class="layui-input" id="name">
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-inline">
+                            <select id="department" name="department" lay-filter="test">
+                                <option value="">部门</option>
+                                <option value="教务处">教务处</option>
+                                <option value="智慧学院">智慧学院</option>
+                                <option value="机电学院">机电学院</option>
+                                <option value="艺术学院">艺术学院</option>
+                                <option value="康养学院">康养学院</option>
+                                <option value="建筑学院">建筑学院</option>
+                                <option value="旅游学院">旅游学院</option>
+                                <option value="交通学院">交通学院</option>
+                                <option value="经贸学院">经贸学院</option>
+                                <option value="教育学院">教育学院</option>
+                                <option value="酒店学院">酒店学院</option>
+                                <option value="电商学院">电商学院</option>
+                                <option value="国际学院">国际学院</option>
+                                <option value="海大航海学院">海大航海学院</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="conType" name="conType">
+                            <option value="">库类别</option>
+                            <option value="1">技能大赛</option>
+                            <option value="2">生产实训</option>
+                            <option value="3">基本技能</option>
+                            <option value="4">设备维护保养</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="attribute" name="attribute">
+                            <option value="">耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="type" name="type">
+                            <option value="">耗材类别</option>
+                            <option value="1">酒店食品</option>
+                            <option value="2">金属材料</option>
+                            <option value="3">电子电器</option>
+                            <option value="4">建筑材料</option>
+                            <option value="5">服装服饰</option>
+                            <option value="6">文化绘画</option>
+                            <option value="7">工作仪表</option>
+                            <option value="8">化工药品</option>
+                            <option value="9">气体类</option>
+                            <option value="10">维修保养</option>
+                            <option value="11">其他</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="layui-btn layui-btn-normal" id="search">搜索</button>
+                    <button type="button" id="exportBtn" class="layui-btn layui-btn-normal"><i class="layui-icon layui-icon-export"></i> 导 出 </button>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="button" required lay-verify="required" autocomplete="off" class="layui-btn layui-btn-normal" id="all" value="当前库价值：">
+                </div>
+            </form>
+        </div>
+    </fieldset>
+
+    <table class="layui-hide" id="demo" lay-filter="currentTableFilter"></table>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+        var CheckedMgr = {
+            tableId:'demo',
+        }
+
+        $("#search").click(function (){
+            tableInit()
+
+         //计算当前库价值
+            $.ajax(
+                {
+                    url: "/inventory/getAll",
+                    type: "get",
+                    data: {"name":$("#name").val(),"attribute":$("#attribute").val(),"type":$("#type").val(),"department":$("#department").val(),"conType":$("#conType").val(),"training":$("#training").val(),"status":$("#status").val()},
+                    success: function(data) {
+                        $('#all').val("当前库价值："+data+"元")
+                    },
+                    error: function() { }
+                }
+            )
+        })
+        $("#search").trigger("click")
+        // 导出选中行数据
+        CheckedMgr.exportData = function (){
+            var res = table.checkStatus('demo')
+            if(res.data.length === 0){
+                layer.msg('请选择导出内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                table.exportFile(CheckedMgr.tableId,res.data,'xls')
+            }
+        }
+        //判断部们
+        $.ajax({
+            url: "/InInventory/getUserDep",
+            type: "get",
+            success: function (data) {
+                if("教务处"!=data) {
+                    $("#department").attr("disabled","disabled");
+                    form.render('select');
+                }
+            }
+            , error: function () {
+            }
+        })
+        tableInit();
+        function tableInit(){
+            table.render({
+                elem: '#' + CheckedMgr.tableId
+                ,height: 500
+                ,url: '/inventory/getInfo' //数据接口
+                ,where:{"name":$("#name").val(),"attribute":$("#attribute").val(),"type":$("#type").val(),"department":$("#department").val(),"conType":$("#conType").val(),"training":$("#training").val(),"status":$("#status").val()}
+                ,title: '借用管理'
+                ,page: true //开启分页
+                ,totalRow: true //开启合计行
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field: 'id', title: 'ID', hide:'true'}
+                    ,{field: 'name', title: '耗材名称'}
+                    ,{field: 'attribute', title: '属性',
+                        templet:function (res){
+                            switch (res.attribute){
+                                case '1':
+                                    return '低值易耗品';
+                                case '2':
+                                    return '低值耐用品';
+                            }
+                        }
+                    }
+                    ,{field: 'standards', title: '耗材规格'}
+                    ,{field: 'type', title: '类型',
+                        templet:function (res){
+                            switch (res.type){
+                                case '1':
+                                    return '酒店食品';
+                                case '2':
+                                    return '金属材料';
+                                case '3':
+                                    return '电子电器';
+                                case '4':
+                                    return '建筑材料';
+                                case '5':
+                                    return '服装服饰';
+                                case '6':
+                                    return '文化绘画';
+                                case '7':
+                                    return '工作仪表';
+                                case '8':
+                                    return '化工药品';
+                                case '9':
+                                    return '气体类';
+                                case '10':
+                                    return '维修保养';
+                                case '11':
+                                    return '其他';
+                            }
+                        }}
+
+                    ,{field: 'status',  title: '可借状态',hide: "true",templet:function (res){
+                            switch (res.status){
+                                case '1':
+                                    return '可借';
+                                case '0':
+                                    return '不可借';
+                            }
+                        }}
+                    ,{field: 'department', title: '学院'}
+                    ,{field: 'conName', title: '名称',
+                        templet:function (res){
+                            switch (res.conType){
+                                case '1':
+                                    return res.conName;
+                                case '2':
+                                    return res.conName;
+                                case '3':
+                                    return '基本技能';
+                                case '4':
+                                    return res.conName;
+                            }
+                        }}
+                    ,{field: 'price', title: '价格',style: 'color: red'}
+
+                    ,{field: 'con_type', title: '库类别',
+                        templet:function (res){
+                            switch (res.conType){
+                                case '1':
+                                    return '技能大赛';
+                                case '2':
+                                    return '生产实训';
+                                case '3':
+                                    return '基本技能';
+                                case '4':
+                                    return '设备维护保养';
+                            }
+                        }}
+                    ,{field: 'number', title: '数量'}
+
+                ]]
+
+            });
+        }
+        // 绑定导出按钮
+        $('#exportBtn').on('click',function (){
+            CheckedMgr.exportData()
+        })
+    })
+</script>
+</html>

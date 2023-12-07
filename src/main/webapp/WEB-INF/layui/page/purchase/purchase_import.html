@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <title>导入模板</title>
+</head>
+<body>
+<div class="layui-container">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label" id="dep"></label>
+            <div class="layui-inline">
+                <div class="layui-inline">
+                    <select id="major" name="major" lay-search>
+                        <option value="">专业</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+  <div class="layui-card">
+    <div class="layui-card-header">采购导入模板</div>
+    <div class="layui-card-body">
+      <p><strong style="color: #ff0000">导入说明：</strong>请先下载模板，<strong style="color: red">保存本地,</strong>在模板内填入采购的“学生数量”，若没有填写学生数量将不会录入采购。
+          特别提醒-<strong>其他数据不允许操作</strong>></p>
+        <span class="layui-layer-shad"></span>
+        <div style="display: flex;justify-content: center">
+          <button type="button" id="templateBtn" class="layui-btn layui-btn-warm">导出模板</button>
+          <button type="button" class="layui-btn" id="uploadBtn"><i class="layui-icon"></i>上传文件</button>
+        </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js"></script>
+<script>
+  layui.use(['table','excel','upload'],function (){
+    var table = layui.table,
+        form = layui.form,
+        excel = layui.excel,
+        $ = layui.jquery,
+        upload = layui.upload
+
+      $.ajax({
+          url: '/purchase/major',
+          type: 'post',
+          dataType: 'json',
+          async: false,
+          success: function (data) {
+              if (data==null){
+                  layer.alert('采购功能无法使用，请联系二级学院管理员，更新您的专业', {
+                      icon: 0,
+                  })
+
+                  $('#uploadBtn').css('pointer-events','none');
+                  $('#uploadBtn').addClass("layui-btn-disabled").attr("disabled", true);
+                  $('#templateBtn').css('pointer-events','none');
+                  $('#templateBtn').addClass("layui-btn-disabled").attr("disabled", true);
+
+              }else {
+                  var str = ''
+                  for (let i = 0; i < data.length; i++) {
+                      str += '<option value="' + data[i] + '" selected>' + data[i] + '</option>'
+                  }
+                  $('#major').append(str)
+                  form.render("select")
+              }
+
+          }
+      })
+
+      $.ajax({
+          url: '/purchase/dep',
+          type: 'post',
+          dataType: 'json',
+          async: false,
+          success: function (data) {
+              var str = data
+              $('#dep').append(str)
+          }
+      })
+
+    $('#templateBtn').on('click',function (){
+        layer.alert('请等待5到10秒左右', {
+            icon: 0,
+        })
+        $.post('/purchase/moban',{major:$("#major").val()},function (res){
+            if(res!=null){
+                res.unshift({id: '耗材编号',name: '耗材名称', attribute: '耗材属性',type:'耗材类别',standards:'耗材规格',unit:'单位'
+                    ,price:'价格',department:'所属学院',mark:'专业',training:'实训项目',number:'生均数量',studentnumber:'学生数量'})
+                var data = excel.filterExportData(res, [
+                    'id', 'name', 'attribute', 'type', 'standards', 'unit', 'price', 'department', 'mark',
+                    'training', 'number', 'studentnumber'
+                ]);
+                excel.exportExcel({
+                    sheet1:data
+                },'导入模板.xls','xls')
+                layer.msg("导出详情成功",{icon:1,time:2000})
+            }else {
+                    layer.alert('请选择相对应的专业或该专业下目录为空', {
+                        icon: 0,
+                    })
+            }
+            }
+
+        ,'json')
+    })
+      upload.render({
+          elem: '#uploadBtn'
+          ,url: '/purchase/daoru'
+          ,accept: 'file'
+          ,size:1024 * 20    // 限制20M大小
+          ,exts:'xls'
+          ,done: function(res){
+              var str;
+              if (res!=null){
+                  console.log(res)
+                  str="以下目录已经采购"
+                  for(let i in res){
+                      str+=i+","
+                  }
+                  layer.alert(str)
+                  // parent.layer.close(parent.layer.index)
+                  layui.sessionData('import',{key:'flag',value:true})
+                  parent.layer.close(parent.layer.index)
+              }else {
+                  layui.sessionData('import',{key:'flag',value:true})
+                  layer.msg("成功上传");
+                  parent.layer.close(parent.layer.index)
+              }
+          }
+      });
+  })
+</script>
+</html>

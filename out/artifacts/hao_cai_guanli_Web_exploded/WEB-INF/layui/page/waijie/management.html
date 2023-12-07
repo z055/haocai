@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>借用管理</title>
+</head>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                        <div class="layui-input-inline">
+                            <input type="text" required lay-verify="required" placeholder="请输耗材名称" autocomplete="off" class="layui-input" id="name">
+                        </div>
+<!--                    <div class="layui-inline">-->
+<!--                        <select id="department" name="department" disabled>-->
+
+<!--                        </select>-->
+<!--                    </div>-->
+                    <div class="layui-inline">
+                        <select id="attribute" name="attribute">
+                            <option value="">耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="type" name="type">
+                            <option value="">耗材类别</option>
+                            <option value="1">酒店食品</option>
+                            <option value="2">金属材料</option>
+                            <option value="3">电子电器</option>
+                            <option value="4">建筑材料</option>
+                            <option value="5">服装服饰</option>
+                            <option value="6">文化绘画</option>
+                            <option value="7">工作仪表</option>
+                            <option value="8">化工药品</option>
+                            <option value="9">气体类</option>
+                            <option value="10">维修保养</option>
+                            <option value="11">其他</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="con_type" name="con_type">
+                            <option value="">库类别</option>
+                            <option value="1">基本技能</option>
+                            <option value="2"> 生产实训</option>
+                            <option value="3">技能大赛</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="status" name="status">
+                            <option value="">借用状态</option>
+                            <option value="1">可借用</option>
+                            <option value="0">不可借用</option>
+                        </select>
+                    </div>
+                    <button type="button" class="layui-btn layui-btn-normal" id="search">搜索</button>
+                    <br/>
+                    <button type="button" class="layui-btn layui-btn-normal" id="year">可以借用</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="no">不可借用</button>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <table class="layui-hide" id="demo" lay-filter="currentTableFilter"></table>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+        $.ajax({
+            url:"/inCon/getUserRol",
+            type:"get",
+            success:function (data){
+                var role=data.split(",")
+                if (role.indexOf("二级学院管理员")==-1){
+                    $("#year").remove()
+                    $("#no").remove()
+                }
+            }
+            ,error:function (){
+
+            }
+        })
+
+        //搜索功能
+        $("#search").click(function (){
+            tableInit()
+        })
+        var CheckedMgr = {
+            tableId:'demo',
+        }
+        //不可解借用
+        $("#no").click(function (){
+            var data=table.checkStatus("demo").data;
+            var ids=new Array();
+            for(var i=0;i<data.length;i++){
+                if (data[i].status=="1"){
+                    ids.push(data[i].id)
+                }
+            }
+            if (ids.length==0){
+                layer.msg("选择数据当前状态不需要修改",{
+                    icon:5,
+                    shift:6
+                })
+                return false;
+            }
+            var sendData={status:"0",ids:ids}
+            $.ajax({
+                url:"/BorrowingManagement/updateStatus",
+                type:"post",
+                contentType:"application/json",
+                data:JSON.stringify(sendData),
+                dataType:"json",
+                success:function(data){
+                    layer.msg(data.message,{
+                        icon:1
+                    })
+                    tableInit();
+                },
+            })
+        })
+        $("#year").click(function (){
+            var data=table.checkStatus("demo").data;
+            var ids=new Array();
+            for(var i=0;i<data.length;i++){
+                if (data[i].status=="0"){
+                    ids.push(data[i].id)
+                }
+            }
+            if (ids.length==0){
+                layer.msg("选择数据当前状态不需要修改",{
+                    icon:5,
+                    shift:6
+                })
+                return false;
+            }
+            var sendData={status:"1",ids:ids}
+            $.ajax({
+                url:"/BorrowingManagement/updateStatus",
+                type:"post",
+                contentType:"application/json",
+                data:JSON.stringify(sendData),
+                dataType:"json",
+                success:function(data){
+                    layer.msg(data.message,{
+                        icon:1
+                    })
+                    tableInit();
+                },
+            })
+        })
+        // 表格渲染
+        tableInit()
+        function tableInit(){
+            table.render({
+                elem: '#' + CheckedMgr.tableId
+                ,height: 500
+                ,url: '/BorrowingManagement/searchQuery' //数据接口
+                ,where:{"name":$("#name").val(),"status":$("#status").val(),"attribute":$("#attribute").val(),"type":$("#type").val(),"con_type":$("#con_type").val()}
+                ,title: '借用管理'
+                ,page: true //开启分页
+                ,totalRow: true //开启合计行
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field: 'id', title: 'ID', hide:'true'}
+                    ,{field: 'name', title: '耗材名称'}
+                    ,{field: 'number', title: '数量'}
+                    ,{field: 'price', title: '价格'}
+                    // 属性:低值易耗品1、低值耐用品2
+                    ,{field: 'attribute', title: '属性'}
+                    ,{field: 'status',  title: '可借状态',
+                        templet:function (res){
+                            switch (res.status){
+                                case '0': return  '不可借'
+                                case  '1':  return '可借用'
+                            }
+                        }}
+                    ,{field: 'type', title: '类型'}
+                ]]
+            });
+        }
+    })
+</script>
+</html>

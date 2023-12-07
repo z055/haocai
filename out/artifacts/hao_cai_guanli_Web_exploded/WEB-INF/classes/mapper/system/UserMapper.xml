@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.system.dao.UserMapper">
+<resultMap id="user" type="User">
+    <id property="userId" column="user_id"/>
+    <result property="avatar" column="avatar"/>
+    <result property="account" column="account"/>
+    <result property="name" column="name"/>
+    <result property="sex" column="sex"/>
+<!--    <result property="roleName" column="rname"/>-->
+    <result property="roleId" column="role_id"/>
+    <result property="deptName" column="dname"/>
+    <result property="email" column="email"/>
+    <result property="phone" column="phone"/>
+    <result property="createTime" column="create_time"/>
+    <result property="status" column="status"/>
+    <result property="zname" column="zname"/>
+</resultMap>
+
+    <sql id="user_select_field">
+        u.user_id,u.role_id,u.avatar,u.account,u.name,u.sex,u.email,u.phone,u.create_time,u.status,d.full_name as dname
+    </sql>
+
+    <select id="getByAccount" resultMap="user">
+        select salt,user_id from sys_user where account=#{account}
+    </select>
+
+    <select id="login" parameterType="String" resultMap="user">
+        SELECT
+            u.user_id,
+            u.account,
+            u.`name`,
+            u.role_id,
+            d.full_name AS dname,
+            z.`name` AS zname
+        FROM
+            sys_user AS u
+                LEFT JOIN zhuanye AS z ON u.zhuanye_id = z.zhuanyeid
+                LEFT JOIN sys_dept AS d ON u.dept_id = d.dept_id
+        WHERE
+            u.account = #{account}
+          AND u.`password` = #{password} AND u.status != 'DELETE'
+    </select>
+
+
+    <select id="loginInfo" parameterType="String" resultMap="user">
+        SELECT
+            u.user_id,
+            u.account,
+            u.`name`,
+            u.role_id,
+            d.full_name AS dname,
+            z.`name` AS zname
+        FROM
+            sys_user AS u
+                LEFT JOIN zhuanye AS z ON u.zhuanye_id = z.zhuanyeid
+                LEFT JOIN sys_dept AS d ON u.dept_id = d.dept_id
+        WHERE
+            u.account = #{account}
+           AND u.status != 'DELETE'
+    </select>
+
+    <select id="singleLogin" resultMap="user">
+        SELECT
+            u.user_id,
+            u.account,
+            u.`name`,
+            u.role_id,
+            d.full_name AS dname,
+            z.`name` AS zname
+        FROM
+            sys_user AS u
+                LEFT JOIN zhuanye AS z ON u.zhuanye_id = z.zhuanyeid
+                LEFT JOIN sys_dept AS d ON u.dept_id = d.dept_id
+        WHERE
+            u.user_id = #{userId}
+          AND u.status != 'DELETE'
+    </select>
+
+    <select id="selectRoleIdByName" parameterType="java.lang.String" resultType="java.lang.String">
+        select role_id from sys_role where name= #{name}
+    </select>
+
+    <select id="getCountByCondition" resultType="int">
+        select count(*) from sys_user as u left join sys_role as r on u.role_id=r.role_id left join sys_dept as d on u.dept_id=d.dept_id where status!='DELETE'
+        <if test="deptId != null and deptId != ''">
+            and (u.dept_id = #{deptId} or u.dept_id in ( select dept_id from sys_dept where pids like CONCAT('%$[', #{deptId}, '$]%') escape '$' ))
+        </if>
+        <if test="condition != null and condition != ''">
+            and (u.phone like CONCAT('%',#{condition},'%')
+            or u.account like CONCAT('%',#{condition},'%')
+            or u.name like CONCAT('%',#{condition},'%'))
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            and u.create_time between #{startTime} and #{endTime}
+        </if>
+    </select>
+
+    <select id="queryUserByCondition" resultMap="user">
+        select
+        <include refid="user_select_field"/>
+        from sys_user as u left join sys_dept as d on u.dept_id=d.dept_id where status!='DELETE'
+        <if test="deptId != null and deptId != ''">
+            and (u.dept_id = #{deptId} or u.dept_id in ( select dept_id from sys_dept where pids like CONCAT('%$[', #{deptId}, '$]%') escape '$' ))
+        </if>
+        <if test="condition != null and condition != ''">
+            and (u.phone like CONCAT('%',#{condition},'%')
+            or u.account like CONCAT('%',#{condition},'%')
+            or u.name like CONCAT('%',#{condition},'%'))
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            and u.create_time between #{startTime} and #{endTime}
+        </if>
+        limit #{startCount},#{endCount}
+    </select>
+
+    <select id="findUserByUserId" resultMap="user">
+        select salt,account,name,birthday,email,sex,phone,password from sys_user where user_id=#{userId}
+    </select>
+
+    <update id="updateUser">
+        update sys_user
+        <set>
+            name=#{user.name},email=#{user.email},sex=#{user.sex},dept_id=#{user.deptId},
+            <if test="user.birthday != null">
+                birthday=#{user.birthday},
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                phone=#{user.phone},
+            </if>
+        </set>
+        where user_id=#{user.userId}
+    </update>
+
+    <update id="reset">
+        update sys_user set password=#{password} where user_id=#{userId}
+    </update>
+
+    <insert id="addUser">
+        insert into sys_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            account,password,salt,name,sex,email,dept_id,status,create_time,create_user,
+            <if test="user.birthday != null">
+                birthday,
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                phone,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{user.account},#{user.password},#{user.salt},#{user.name},#{user.sex},#{user.email},#{user.deptId},'ENABLE',now(),1,
+            <if test="user.birthday != null">
+                #{user.birthday},
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                #{user.phone},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="addSingleUser" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+        insert into sys_user
+            (account,password,salt,name,sex,dept_id,status)
+        values
+            (#{user.account},#{user.password},#{user.salt},#{user.name},#{user.sex},#{user.deptId},'ENABLE')
+    </insert>
+
+    <update id="changeStatus">
+        update sys_user set status=#{status} where user_id=#{userId}
+    </update>
+
+    <update id="changeRole">
+        update sys_user set role_id=#{roleIds} where user_id=#{userId}
+    </update>
+
+    <update id="changeUserInfo" parameterType="com.haocai.module.system.vo.User">
+        update sys_user
+            <set>
+                sex=#{user.sex},name=#{user.name},email=#{user.email},phone=#{user.phone},
+                <if test="user.birthday != null">
+                    birthday=#{user.birthday},
+                </if>
+            </set>
+            where user_id = #{user.userId}
+    </update>
+
+    <update id="changePassword">
+        update sys_user set password=#{password} where user_id=#{userId}
+    </update>
+
+    <select id="findMajorToSelect" resultType="map">
+        select zhuanyeid,name from zhuanye
+    </select>
+
+    <update id="setRole">
+        update sys_user
+        <set>
+            role_id=#{roleId},
+            <if test="majorId != '' and majorId != null">
+                zhuanye_id=#{majorId}
+            </if>
+        </set>
+        where user_id=#{userId}
+    </update>
+
+    <!-- 根据角色名查询用户 -->
+    <select id="getUserByRoleName" resultType="com.haocai.module.system.vo.User">
+        SELECT
+            u.user_id AS userId,
+            u.`name` AS `name`
+        FROM
+            sys_user AS u,
+            sys_role AS r,
+            sys_dept AS d
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.role_id LIKE CONCAT('%',(SELECT role_id FROM sys_role WHERE name = #{roleName}),'%')
+            </if>
+
+            <if test="department != '' and department != null">
+                AND    u.dept_id LIKE CONCAT('%',(SELECT dept_id FROM sys_dept WHERE full_name = #{department}),'%')
+            </if>
+            AND u.`status` != 'DELETE' AND u.role_id = r.role_id AND u.dept_id = d.dept_id
+        </where>
+    </select>
+    <!-- 与上面方法一样，用于表格样式 -->
+    <select id="getUserByRoleNameToTable" resultType="com.haocai.module.system.vo.User">
+        SELECT
+            u.user_id AS userId,
+            u.account AS account,
+            u.`name` AS `name`,
+            u.email AS email,
+            u.phone AS phone
+        FROM
+            sys_user AS u,
+            sys_role AS r
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.role_id LIKE CONCAT('%',(SELECT role_id FROM sys_role WHERE name = #{roleName}),'%')
+            </if>
+            AND u.`status` != 'DELETE' AND u.role_id = r.role_id
+        </where>
+        LIMIT #{start},#{end}
+    </select>
+    <select id="getUserByRoleNameCount" resultType="int">
+        SELECT
+            count(*)
+        FROM
+            sys_user AS u,
+            sys_role AS r
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.role_id LIKE CONCAT('%',(SELECT role_id FROM sys_role WHERE name = #{roleName}),'%')
+            </if>
+            AND u.`status` != 'DELETE' AND u.role_id = r.role_id
+        </where>
+    </select>
+
+<!--    第一级审核人,查本学院 -->
+    <select id="getUserByRoleNameToTableLevelOne" resultType="com.haocai.module.system.vo.User">
+        SELECT
+        u.user_id AS userId,
+        u.account AS account,
+        u.`name` AS `name`,
+        u.email AS email,
+        u.phone AS phone
+        FROM
+        sys_user AS u,
+        sys_role AS r
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.role_id LIKE CONCAT('%',(SELECT role_id FROM sys_role WHERE name = #{roleName}),'%')
+            </if>
+            <if test="department != '' and department != null">
+                AND u.dept_id = (SELECT dept_id FROM sys_dept WHERE full_name = #{department})
+            </if>
+            AND u.`status` != 'DELETE' AND u.role_id = r.role_id
+        </where>
+        LIMIT #{start},#{end}
+    </select>
+    <select id="getUserByRoleNameLevelOneCount" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        sys_user AS u,
+        sys_role AS r
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.role_id LIKE CONCAT('%',(SELECT role_id FROM sys_role WHERE name = #{roleName}),'%')
+            </if>
+            <if test="department != '' and department != null">
+                AND u.dept_id = (SELECT dept_id FROM sys_dept WHERE full_name = #{department})
+            </if>
+            AND u.`status` != 'DELETE' AND u.role_id = r.role_id
+        </where>
+    </select>
+
+    <select id="getUserByRoleNameTodep" resultType="com.haocai.module.system.vo.User">
+        SELECT
+        u.user_id AS userId,
+        u.account AS account,
+        u.`name` AS `name`,
+        u.email AS email,
+        u.phone AS phone
+        FROM
+        sys_user AS u,
+        sys_dept AS d
+        <where>
+            <if test="roleName != '' and roleName != null">
+                u.dept_id LIKE CONCAT('%',(SELECT dept_id FROM sys_dept WHERE full_name = #{roleName}),'%')
+            </if>
+            AND u.`status` != 'DELETE' AND u.dept_id = d.dept_id
+        </where>
+        LIMIT #{start},#{end}
+    </select>
+</mapper>

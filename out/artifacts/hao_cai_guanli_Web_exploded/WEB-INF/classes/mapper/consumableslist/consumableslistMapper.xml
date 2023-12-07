@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.consumableslist.dao.ConsumableslistMapper">
+    <!--统计数据数量-->
+    <select id="dataCount" resultType="Integer"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select count(*) from t_consumableslist where 1 = 1
+        <if test="attribute!=null and attribute!=''">
+            and attribute =#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and type =#{type}
+        </if>
+        <if test="name!=null and name!=''">
+            and name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and (operatordate between #{beginTime} and #{endTime})
+        </if>
+        <if test="department!=null and department!=''">
+            and department =#{department}
+        </if>
+        <if test="status!=null and status!=''">
+            and status =#{status}
+        </if>
+        <if test="operatoraccount!=null and operatoraccount!=''">
+            and operatoraccount =#{operatoraccount}
+        </if>
+        <if test="major!=null and major!=''">
+            and mark = #{major}
+        </if>
+    </select>
+
+    <!--查询数据-->
+    <select id="getAllConsumablesList" resultType="com.haocai.module.consumableslist.vo.Consumableslist"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select * from t_consumableslist where 1 = 1
+        <if test="attribute!=null and attribute!=''">
+            and attribute =#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and type =#{type}
+        </if>
+        <if test="name!=null and name!=''">
+            and name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and (operatordate between #{beginTime} and #{endTime})
+        </if>
+        <if test="department!=null and department!=''">
+            and department =#{department}
+        </if>
+        <if test="status!=null and status!=''">
+            and status =#{status}
+        </if>
+        <if test="operatoraccount!=null and operatoraccount!=''">
+            and operatoraccount =#{operatoraccount}
+        </if>
+        <if test="major!=null and major!=''">
+            and mark = #{major}
+        </if>
+        order by operatordate desc limit #{page},#{limit}
+    </select>
+
+    <!--查询数据-->
+    <select id="getTrainingByCourseCount" resultType="com.haocai.module.consumableslist.vo.Consumableslist"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select * from t_consumableslist where 1 = 1
+        <if test="attribute!=null and attribute!=''">
+            and attribute =#{attribute}
+        </if>
+        <if test="type!=null and type!=''">
+            and type =#{type}
+        </if>
+        <if test="name!=null and name!=''">
+            and name like CONCAT('%',#{name},'%')
+        </if>
+        <if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+            and (operatordate between #{beginTime} and #{endTime})
+        </if>
+        <if test="department!=null and department!=''">
+            and department =#{department}
+        </if>
+        <if test="status!=null and status!=''">
+            and status =#{status}
+        </if>
+
+        <if test="department!=null">
+            and department =#{department}
+        </if>
+        <if test="operatoraccount!=null and operatoraccount!=''">
+            and operatoraccount =#{operatoraccount}
+        </if>
+        <if test="major!=null and major!=''">
+            and mark = #{major}
+        </if>
+
+    </select>
+
+    <!--查询课程表里专业-->
+    <select id="getCourseMajor" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select distinct mark as major
+        from t_consumableslist
+        where department = #{department}
+    </select>
+
+    <!--根据专业查询课程表里课程-->
+    <select id="getCourseName" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select name
+        from t_course
+        where major = #{major}
+          and department = #{department}
+    </select>
+
+    <!--根据账号查询专业负责人所带专业名-->
+    <select id="getUserMajor" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="java.lang.String">
+        select major_id
+        from sys_user
+        where account=#{account}
+    </select>
+
+    <!--查询课程表里实训项目-->
+    <select id="getTrainingByCourse" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select training from t_course where 1=1
+        <if test="major!=null and major!=''">
+            and major =#{major}
+        </if>
+        <if test="courseName!=null and courseName!=''">
+            and name =#{courseName}
+        </if>
+        and department=#{department}
+
+    </select>
+
+
+    <!--添加时根据课程名选择实训名查询课程管理-->
+    <select id="selectCourseData" resultType="com.haocai.module.consumableslist.param.MajorCourse"
+            parameterType="com.haocai.module.consumableslist.param.MajorCourse">
+        select training from t_course where
+                department=#{department}
+                and major=#{major}
+                and name=#{name}
+                and userAccount=#{operatoraccount}
+    </select>
+
+    <!--添加查重-->
+    <select id="addReCheckData" parameterType="com.haocai.module.consumableslist.vo.Consumableslist"
+            resultType="com.haocai.module.consumableslist.vo.Consumableslist">
+        select *
+        from t_consumableslist
+        where name = #{name}
+          and attribute=#{attribute}
+          and type=#{type}
+          and standards = #{standards}
+          and unit=#{unit}
+          and price = #{price}
+          and number = #{number}
+          and department = #{department}
+          and training = #{training}
+          and semester=#{semester}
+          and mark=#{mark}
+
+    </select>
+
+    <!--耗材编号no查询保证唯一-->
+    <select id="selectNoData" parameterType="com.haocai.module.consumableslist.vo.Consumableslist"
+            resultType="com.haocai.module.consumableslist.vo.Consumableslist">
+        select distinct no
+        from t_consumableslist
+        where name =#{name}
+    </select>
+
+    <!--添加数据-->
+    <insert id="addConsumablesList" parameterType="com.haocai.module.consumableslist.vo.Consumableslist">
+        insert into t_consumableslist
+        (id, review_id, name, no, attribute, type, standards, unit, price, number, training, semester, department,
+         operator, auditor, operatordate, auditordate, status, status_z, opinion, mark, operatorname, auditorname,
+         operatoraccount)
+        values (#{id}, #{review_id}, #{name}, #{no}, #{attribute}, #{type}, #{standards}, #{unit}, #{price}, #{number},
+                #{training}, #{semester}, #{department}, #{operator}, #{auditor}, #{operatordate}, #{auditordate},
+                #{status}, #{status_z}, #{opinion}, #{mark}, #{operatorname}, #{auditorname}, #{operatoraccount})
+    </insert>
+
+    <!--打回数据状态修改-->
+    <update id="modifyConsumablesListState" parameterType="com.haocai.module.consumableslist.vo.Consumableslist">
+        update t_consumableslist
+        set status="3",
+            status_z="1"
+        where id = #{id}
+    </update>
+
+    <!--打回数据状态批量修改-->
+    <update id="modifyConsumablesListStateByReviewId" parameterType="java.lang.String">
+        update t_consumableslist
+        set status="3",
+            status_z="1"
+        where review_id = #{review_id}
+    </update>
+
+    <!--三角色的状态修改-->
+    <update id="modifyReviewState01" parameterType="java.lang.String">
+        update review_table
+        set status=0,
+            audit_body=null
+        where review_id = #{rewiew_id}
+          and role = "二级学院管理员"
+    </update>
+    <update id="modifyReviewState02" parameterType="java.lang.String">
+        update review_table
+        set status=null,
+            audit_body=null
+            where review_id = #{rewiew_id} and role = "二级学院教学院长"
+    </update>
+    <update id="modifyReviewState03" parameterType="java.lang.String">
+        update review_table
+        set status=null,
+            audit_body=null
+            where review_id = #{rewiew_id} and role = "教务处管理员"
+    </update>
+
+    <update id="updateConsumablesList" parameterType="com.haocai.module.consumableslist.vo.Consumableslist">
+        update t_consumableslist
+        set training=#{training},
+            no=#{no},
+            name=#{name},
+            standards=#{standards},
+            attribute=#{attribute},
+            type=#{type},
+            department=#{department},
+            unit=#{unit},
+            price=#{price},
+            number=#{number},
+            operator=#{operator},
+            operatordate=#{operatordate},
+            operatorname=#{operatorname}
+        where id = #{id}
+    </update>
+
+    <!--删除数据-->
+    <delete id="deleteData" parameterType="com.haocai.module.consumableslist.vo.Consumableslist">
+        delete
+        from t_consumableslist
+        where id = #{id}
+    </delete>
+
+    <!--删除数据时同时删除审核表里的审核数据-->
+    <delete id="deleteReviewData" parameterType="com.haocai.module.consumableslist.vo.Consumableslist">
+        delete
+        from review_table
+        where review_id = #{review_id}
+    </delete>
+
+    <!--批量删除目录表里的数据-->
+    <delete id="deleteSelectData" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        delete from t_consumableslist
+        where review_id in
+        <foreach collection="reviewIds" item="review_id" open="(" close=")" separator=",">
+            #{review_id}
+        </foreach>
+    </delete>
+
+    <!--批量删除审核表里数据-->
+    <delete id="deleteSelectReviewData" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        delete from review_table
+        where review_id in
+        <foreach collection="reviewIds" item="review_id" open="(" close=")" separator=",">
+            #{review_id}
+        </foreach>
+    </delete>
+
+
+    <!--查询被修改数据-->
+    <select id="selectUpdateData" parameterType="com.haocai.module.consumableslist.vo.Consumableslist"
+            resultType="com.haocai.module.consumableslist.vo.Consumableslist">
+        select *
+        from t_consumableslist
+        where id = #{id}
+    </select>
+
+
+    <!--时间开放管理-->
+    <update id="timeSetting" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        update t_timesetting
+        set beginTime=#{beginTime},
+            endTime=#{endTime},
+            operator=#{operator},
+            operatordate=#{operatordate},
+            operatorname=#{operatorname}
+        where id = 1
+    </update>
+
+    <!--时间开放查询-->
+    <select id="selectTimeResult" resultType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select beginTime, endTime
+        from t_timesetting
+        where id = 1
+    </select>
+
+    <!--审核提交-->
+    <update id="auditSubmit" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        update t_consumableslist
+        set status=#{status},
+        status_z=#{status_z}
+        where review_id in
+        <foreach collection="reviewIds" item="review_id" open="(" close=")" separator=",">
+            #{review_id}
+        </foreach>
+    </update>
+
+
+    <!--针对上传excel错误的操作-->
+
+    <select id="getErrorExcel" parameterType="com.haocai.module.consumableslist.vo.ErrorExcel"
+            resultType="com.haocai.module.consumableslist.vo.ErrorExcel">
+        select *
+        from errorexcel
+        where userid = #{userid}
+    </select>
+
+    <delete id="deleteErrorExcel" parameterType="com.haocai.module.consumableslist.vo.ErrorExcel">
+        delete
+        from errorexcel
+        where userid = #{userid}
+    </delete>
+
+    <insert id="addErrorExcel" parameterType="com.haocai.module.consumableslist.vo.ErrorExcel">
+        insert into errorexcel
+        (id, name, attribute, type, standards, unit, price, number, training, semester, department, userid, errormsg)
+        values (#{id}, #{name}, #{attribute}, #{type}, #{standards}, #{unit}, #{price}, #{number}, #{training},
+                #{semester}, #{department}, #{userid}, #{errormsg})
+    </insert>
+
+    <select id="selectCourseByTraining" parameterType="com.haocai.module.consumableslist.vo.Consumableslist"
+            resultType="com.haocai.module.course.vo.Course">
+        select *
+        from t_course
+        where training like CONCAT('%', #{training}, '%')
+    </select>
+
+    <update id="updateMark" parameterType="com.haocai.module.consumableslist.vo.Consumableslist01">
+        update t_consumableslist
+        set mark=#{mark} where operatorname=#{operatorname} and department=#{department}
+    </update>
+
+    <!--上传excel时对所属专业进行判断-->
+    <select id="selectMajorByMark" parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam" resultType="int">
+        select count(*) from zhuanye where department=#{department} and name=#{major}
+    </select>
+
+
+    <!--查询部门里的所有专业(目录添加页面)-->
+    <select id="initMajorSelect" resultType="com.haocai.module.consumableslist.result.CourseDataResult"
+            parameterType="com.haocai.module.consumableslist.param.ConsumableslistParam">
+        select distinct name
+        from zhuanye
+        where department = #{department}
+    </select>
+
+    <!--查询所选部门下本人的课程(目录添加页面)-->
+    <select id="addExistCourse" resultType="com.haocai.module.consumableslist.param.MajorCourse"
+            parameterType="com.haocai.module.consumableslist.param.MajorCourse">
+        select distinct name
+        from t_course
+        where department = #{department} and major = #{major} and userAccount=#{operatoraccount}
+    </select>
+
+</mapper>

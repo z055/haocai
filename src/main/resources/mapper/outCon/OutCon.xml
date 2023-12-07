@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.outCon.dao.OutDao">
+<!--    <select id="getData" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">-->
+<!--        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="out_type!=null">and out_type=#{out_type}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName} and ( status_z=2  or status_z=3)</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--        limit #{page},#{limit}-->
+<!--    </select>-->
+    <select id="getData" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+<!--    <select id="getData2" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">-->
+<!--        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId  from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--        union-->
+<!--        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="out_type!=null">and out_type=#{out_type}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName} and ( status_z=2  or status_z=3)</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--        limit #{page},#{limit}-->
+<!--    </select>-->
+    <select id="getData2" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId  from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+        union
+        select id ,name,number,price,price*number price_z,attribute,type,department,left(out_time,19) as out_time,status_z,con_type,review_id,standards,applicantName,con_type_id as conTypeId from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+<!--    <select id="getCount" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">-->
+<!--        select count(*) from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="out_type!=null">and out_type=#{out_type}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName} and ( status_z=2  or status_z=3)</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--    </select>-->
+    <select id="getCount" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select count(*) from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+    </select>
+<!--    <select id="getCount2" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">-->
+<!--        select count(*) from-->
+<!--        (-->
+<!--        select id ,name,number,price,price*number price_z,attribute,type,department,out_time,status_z,con_type,review_id,standards,applicantName from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--        union-->
+<!--        select id ,name,number,price,price*number price_z,attribute,type,department,out_time,status_z,con_type,review_id,standards,applicantName from t_consumablesout-->
+<!--        <where>-->
+<!--            <if test="status_z!=null">and status_z=#{status_z}</if>-->
+<!--            <if test="applicant!=null">and applicant=#{applicant}</if>-->
+<!--            <if test="name!=null">and name like "%"#{name}"%" </if>-->
+<!--            <if test="attribute!=null"> and attribute=#{attribute}</if>-->
+<!--            <if test="type!=null">and type=#{type}</if>-->
+<!--            <if test="con_type!=null">and con_type=#{con_type}</if>-->
+<!--            <if test="department!=null">and department=#{department}</if>-->
+<!--            <if test="out_type!=null">and out_type=#{out_type}</if>-->
+<!--            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>-->
+<!--            <if test="LibraryName!=null">and LibraryName=#{LibraryName} and ( status_z=2  or status_z=3)</if>-->
+<!--            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>-->
+<!--            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>-->
+<!--        </where>-->
+<!--        ) outcon-->
+<!--    </select>-->
+    <select id="getCount2" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select count(*) from
+        (
+        select id ,name,number,price,price*number price_z,attribute,type,department,out_time,status_z,con_type,review_id,standards,applicantName from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+        union
+        select id ,name,number,price,price*number price_z,attribute,type,department,out_time,status_z,con_type,review_id,standards,applicantName from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+            <if test="startTime!=null">and out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= out_time</if>
+        </where>
+        ) outcon
+    </select>
+<!--    获取报废信息-->
+    <select id="getScrapData" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select id ,name,number,price,price*number price_z,attribute,type,department,out_time,status_z,con_type,review_id,standards from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName} </if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+    <select id="getScrapCount" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select count(*) from t_consumablesout
+        <where>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <if test="applicant!=null">and applicant=#{applicant}</if>
+            <if test="name!=null">and name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="out_type!=null">and out_type=#{out_type}</if>
+            <if test="applicantName!=null">and applicantName like  "%"#{applicantName}"%"</if>
+            <if test="LibraryName!=null">and LibraryName=#{LibraryName}</if>
+        </where>
+    </select>
+
+
+
+<!--提交审核功能-->
+<!--    修改出库表状-->
+   <update id="setConStatus">
+            update  t_consumablesout set status=1 ,status_z=1,review_id=#{review_id} where id=#{id}
+   </update>
+    <!--    修改借用表状-->
+    <update id="setSbStatus">
+        update  t_consumablesborrow set status=1 ,status_z=1,review_id=#{review_id} where id=#{id}
+    </update>
+
+<!--        添加审核记录-->
+    <insert id="addReview" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        insert into review_table(id,review_id,project_name,re_pe_id,<if test="before_re!=null">before_re,</if> <if test="after_re!=null">after_re,</if><if test="status!=null">status,</if>role)
+            value(#{id},#{review_id},#{project_name},#{roleId},<if test="before_re!=null">#{before_re},</if> <if test="after_re!=null">#{after_re},</if><if test="status!=null">#{status},</if>#{role})
+    </insert>
+
+
+
+
+
+    <!--删除-->
+    <delete id="del" parameterType="String">
+        delete from t_consumablesout where id in
+        <foreach collection="array" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="getReviewIds" resultType="com.haocai.module.outCon.vo.OutReviewVo">
+        select review_id from t_consumablesout where id in
+        <foreach collection="list" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+    <delete id="delReviewById">
+        delete from review_table where review_id in
+        <foreach collection="list" item="review_id" separator="," open="(" close=")">
+            #{review_id}
+        </foreach>
+    </delete>
+
+
+
+
+
+    <!--    查询库存耗材数量和总价格-->
+    <select id="getConNumber" parameterType="com.haocai.module.outCon.vo.OutConVo" resultType="com.haocai.module.outCon.vo.OutConVo">
+        select id,number,prices price_z from t_consumables
+        <where>
+            department=#{department}
+            and name=#{name}
+            and price=#{price}
+            and con_type=#{con_type}
+            and standards=#{standards}
+            <if test="con_type!=3">and con_type_id = #{conTypeId}</if>
+        </where>
+    </select>
+    <!--//出库-->
+    <update id="outConNumber" parameterType="com.haocai.module.inCon.vo.InConVo">
+        update t_consumables set  number=number-#{number} where price=#{price} and name=#{name} and department=#{department} and type = #{type} and con_type=#{con_type} and standards=#{standards} <if test="con_type!=3">and con_type_id = #{conTypeId}</if>
+    </update>
+
+    <!--    修改借用表状-->
+    <update id="setOutStatus" parameterType="com.haocai.module.outCon.vo.OutConVo">
+        update t_consumablesout  set  status_z=3 , out_con_time = #{out_con_time}  where id=#{id}
+    </update>
+
+    <update id="updatePriceCons" parameterType="String">
+        update t_consumables set prices=#{prices} where id=#{id}
+    </update>
+
+
+<!--    入库表里面添加数据-->
+    <insert id="addOutCon" parameterType="com.haocai.module.outCon.vo.OutConVo">
+        insert into t_consumablesout (id,name ,type,number,con_type,out_type,price,prices,attribute,department,applicant,standards,OutYear,LibraryName,review_id,applicantName,con_type_id,con_type_no)
+        value (#{id},#{name},#{type},#{number},#{con_type},#{out_type},#{price},#{price_z},#{attribute},#{department},#{applicant},#{standards},#{outYear},#{LibraryName},#{review_id},#{applicantName},#{conTypeId},#{conTypeNo})
+    </insert>
+
+<!--    根据id获取库存表耗材信息-->
+    <select id="getConById" resultType="com.haocai.module.outCon.vo.OutConVo">
+        select name,number,department,price,attribute,type,standards,con_type from t_consumables where id=#{id}
+    </select>
+
+    <!--        添加审核记录2-->
+    <insert id="AddOutConReview" parameterType="com.haocai.module.outCon.vo.OutReviewVo">
+        insert into review_table(id,review_id,project_name,re_pe_id,before_re,after_re,role<if test="status!=null">,status</if>)
+        value(#{id},#{review_id},#{project_name},#{re_pe_id},#{before_re},#{after_re},#{role}<if test="status!=null">,#{status}</if>)
+    </insert>
+    <!--申请表中相同耗材的总数量-->
+    <select id="getReviewSumNumber" parameterType="com.haocai.module.outCon.vo.OutConVo" resultType="Integer">
+        select sum(number) from t_consumablesout
+        where name = #{name}
+                and price = #{price}
+                and attribute = #{attribute}
+                and type=#{type}
+                and con_type = #{con_type}
+                and department=#{department}
+                and standards=#{standards}
+                and (status_z=0  or status_z=2)
+    </select>
+    <select id="getNumber" resultType="java.lang.Integer">
+        select number from t_consumables
+        where id = #{id}
+    </select>
+    <select id="getId" resultType="com.haocai.module.outCon.vo.param.OutVoParam" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select re_pe_id as roleId,after_re from review_table where review_id=#{review_id} and status=0
+    </select>
+    <select id="getTweId" resultType="com.haocai.module.outCon.vo.param.OutVoParam" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select re_pe_id as roleId,after_re from review_table where review_id=#{review_id} and status=3
+    </select>
+    <select id="getName" resultType="com.haocai.module.system.vo.User" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select name from sys_user where user_id=#{roleId}
+    </select>
+    <select id="getCourseName" resultType="com.haocai.module.outCon.vo.ConTypeNameVo">
+        select id,no,department,major,name,training from t_course
+        <where>
+            <if test="department!=null">department = #{department}</if>
+            <if test="major!=null">and major = #{major} </if>
+            <if test="name!=null">and name like "%"#{name}"%"</if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+    <select id="getCourseCount" resultType="java.lang.Integer">
+        select count(*) from t_course
+        <where>
+            <if test="department!=null">department = #{department}</if>
+            <if test="major!=null">and major = #{major} </if>
+            <if test="name!=null">and name like "%"#{name}"%"</if>
+        </where>
+    </select>
+    <select id="getConTypeName" resultType="com.haocai.module.outCon.vo.ConTypeNameVo">
+        select id,department_trainmeg as name from trainmeg_keep
+        <where>
+            <if test="conType!=null">conType = #{conType}</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%" </if>
+        </where>
+        limit #{page},#{limit}
+    </select>
+    <select id="getConTypeCount" resultType="java.lang.Integer">
+        select count(*) from trainmeg_keep
+        <where>
+            <if test="conType!=null">conType = #{conType}</if>
+            <if test="name!=null">and department_trainmeg like "%"#{name}"%" </if>
+        </where>
+    </select>
+</mapper>

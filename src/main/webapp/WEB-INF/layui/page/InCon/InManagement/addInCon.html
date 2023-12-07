@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <title>入库添加</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <form id="consumableslistForm" lay-filter="consumableslistForm" class="layui-form layuimini-form"
+          style="max-width: 700px;margin:auto;">
+        <input type="text" id="consumablesid" value="" name="consumablesid" hidden>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">单据编号</label>
+            <div class="layui-input-block">
+                <input type="text" id="receiptNo" name="receiptNo" placeholder="请输入单据编号" value=""
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">耗材名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请输入耗材名称" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">耗材规格</label>
+            <div class="layui-input-block">
+                <input type="text" id="standards" name="standards" placeholder="请输入耗材规格" value=""
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">入库数量</label>
+            <div class="layui-input-block">
+                <input type="number" id="number" name="inNumber" min="1" oninput="validateInput(this)" placeholder="请输入入库数量" value=""
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">耗材单价</label>
+            <div class="layui-input-block">
+                <input type="price" id="price" name="price" placeholder="请输入耗材单价" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">耗材属性</label>
+            <div class="layui-input-block">
+                <select id="attribute" name="attribute" lay-search>
+                    <option value="">请选择耗材属性</option>
+                    <option value="1">低值易耗品</option>
+                    <option value="2">低值耐用品</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">耗材类型</label>
+            <div class="layui-input-block">
+                <select id="type" name="type" lay-search>
+                    <option value="">请选择耗材类别</option>
+                    <option value="1">酒店食品</option>
+                    <option value="2">金属材料</option>
+                    <option value="3">电子电器</option>
+                    <option value="4">建筑材料</option>
+                    <option value="5">服装服饰</option>
+                    <option value="6">文化绘画</option>
+                    <option value="7">工作仪表</option>
+                    <option value="8">化工药品</option>
+                    <option value="9">气体类</option>
+                    <option value="10">维修保养</option>
+                    <option value="11">其他</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">库类别</label>
+            <div class="layui-input-block">
+                <select id="conType" name="conType" lay-search lay-filter="conType">
+                    <option value="">请选择库类别</option>
+                    <option value="1">技能大赛</option>
+                    <option value="2">生产实训</option>
+                    <option value="3">基本技能</option>
+                    <option value="4">设备维护保养</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" hidden>
+            <label class="layui-form-label required">耗材库类别对应名称</label>
+            <div class="layui-input-block">
+                <input type="text" id="conTypeName" name="conTypeName"
+                       placeholder="点击选择名称" value="" class="layui-input" readonly="true">
+            </div>
+        </div>
+        <input type="text" id="conTypeId" value="" name="conTypeId" hidden>
+        <input type="text" id="conTypeNo" value="" name="conTypeNo" hidden>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn" id="add">添加</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script>
+    function validateInput(input) {
+        input.value = input.value.replace(/\D/g, ''); // 只保留数字
+        if (input.value === '') {
+            return; // 输入为空时不进行验证
+        }
+        var num = parseInt(input.value);
+        if (isNaN(num) || num <= 0) {
+            input.value = ''; // 清空输入
+        }
+    }
+    layui.use(['form'], function () {
+        var form = layui.form,
+            dropdown = layui.dropdown,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+        layui.sessionData('conTypeData', {key: 'data', value: ""})
+        form.on('select(conType)', function () {
+            $("#conTypeName").val("")
+            layui.sessionData('conTypeData', {key: 'data', value: ""})
+            if ($("#conType").val() == "3" || $("#conType").val() == "") {
+                $("#conTypeName").parent().parent().attr("hidden", "true")
+            } else {
+                $("#conTypeName").parent().parent().removeAttr("hidden")
+            }
+        })
+        $.ajax({
+            url: "/inCon/getDepartment",
+            type: "get",
+            success: function (data) {
+                layui.sessionData("department", {key: 'name', value: data})
+            }
+        })
+
+        $("#conTypeName").click(function () {
+            layui.sessionData('conType', {key: 'name', value: $("#conType").val()})
+            layer.open({
+                title: '选择名称',
+                type: 2,
+                shade: 0.2,
+                shadeClose: true,
+                maxmin: true,
+                area: ['80%', '100%'],
+                content: '/page/conTypeName',
+                end: function () {
+                    var data = layui.sessionData("conTypeData").data
+                    $("#conTypeName").val(data.name);
+                    $("#conTypeId").val(data.id);
+                    $("#conTypeNo").val(data.no);
+                    layui.use('element', function () {
+                        var element = layui.element;
+                        element.init();
+                    });
+                }
+            });
+        })
+        //添加按钮操作
+        $("#add").click(function () {
+            var sendData = {
+                "receiptNo": $("#receiptNo").val(),
+                "name": $("#name").val(),
+                "number": $("#number").val(),
+                "price": $("#price").val(),
+                "attribute": $("#attribute").val(),
+                "con_type": $("#conType").val(),
+                "type": $("#type").val(),
+                "standards": $("#standards").val(),
+                "conTypeId": $("#conTypeId").val(),
+                "conTypeNo": $("#conTypeNo").val()
+            }
+            if ($("#receiptNo").val() == "" ||$("#name").val() == "" || $("#number").val() == "" || $("#price").val() == "" || $("#attribute").val() == "" || $("#conType").val() == "" || $("#type").val() == "" || $("#standards").val() == "") {
+                layer.msg("请完善添加信息", {
+                    icon: 5
+                })
+                return false
+            }else if($("#conType").val() == "1" || $("#conType").val() == "2" || $("#conType").val() == "4" ){
+                if($("#conTypeName").val() == ""){
+                    layer.msg("请完善添加信息", {
+                        icon: 5
+                    })
+                    return false
+                }
+
+            }
+            $.ajax({
+                url: '/inCon/addCon',
+                type: 'post',
+                async:false,
+                data: sendData,
+                dataType: 'json',
+                success: function (res) {
+
+                }
+            })
+            parent.layer.close(parent.layer.index);
+        })
+    });
+</script>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../lib/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/zTree/js/jquery.ztree.all.js"></script>
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main layui-row layui-col-space10">
+        <div class="layui-col-md2">
+            <fieldset class="table-search-fieldset">
+                <legend>部门信息</legend>
+                <ul id="deptTree" class="ztree"></ul>
+            </fieldset>
+        </div>
+        <div class="layui-col-md10">
+            <fieldset class="table-search-fieldset">
+                <legend>搜索信息</legend>
+                <div style="margin: 10px 10px 10px 10px">
+                    <form class="layui-form layui-form-pane" action="">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label" style="width: 140px;">账号/姓名/手机号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="condition" name="condition" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <input id="timeLimit" class="layui-input" type="text" name="timeLimit" placeholder="注册时间"/>
+                            </div>
+                            <div class="layui-inline">
+                                <button type="button" id="searchBtn" class="layui-btn layui-btn-normal" ><i class="layui-icon"></i> 搜 索</button>
+                                <button type="button" id="addBtn" class="layui-btn layui-btn-normal" ><i class="layui-icon layui-icon-addition"></i> 添 加 </button>
+                                <button type="button" id="exportBtn" class="layui-btn layui-btn-normal" ><i class="layui-icon layui-icon-export"></i> 导 出 </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">修改</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+            <a class="layui-btn layui-btn-xs layui-btn-normal data-count-delete" lay-event="changeRole">分配角色</a>
+            <a class="layui-btn layui-btn-xs layui-btn-warm data-count-delete" lay-event="reset">重置密码</a>
+        </script>
+
+    </div>
+</div>
+<script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    var ztree = $.fn.zTree
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+        // 用户管理
+        var userMgr = {
+            tableId:'currentTableId',
+            condition:{
+                condition: '',
+                timeLimit: '',
+                deptId:-1
+            }
+        }
+        // ztree设置项
+        var zTreeSetting = {
+            data:{
+                key:{
+                    name:'name'
+                },
+                simpleData:{
+                    enable:true,
+                    idKey:'id',
+                    pIdKey:'pId',
+                    rootPId:-1
+                },
+            },
+            callback:{
+                onClick:function (event,treeId,data){
+                    userMgr.zTreeClick(event,treeId,data)
+                }
+            }
+        }
+
+        // 初始化表格列
+        userMgr.initColumn = function (){
+            return [[
+                {type: "checkbox", width: 50},
+                {field: 'account', width: 130, title: '账号', sort: true},
+                {field: 'name', width: 100, title: '姓名', sort: true},
+                {field: 'sex', width: 80, title: '性别', sort: true, templet:function (res){
+                        return res.sex === 'M' ? '男' : '女'
+                    }},
+                {field: 'roleName', width: 130, title: '角色', sort: true},
+                {field: 'deptName', width: 90, title: '区域', sort: true},
+                {field: 'email', width: 180, title: '邮箱', sort: true},
+                {field: 'phone', width: 120, title: '电话', sort: true},
+                {field: 'createTime', width: 160, title: '创建时间', sort: true},
+                {field: 'status', width: 100, title: '状态', sort: true, templet:function (res){
+                        let flag = 'checked'
+                        if(res.status === 'LOCKED'){
+                            flag = ''
+                        }
+                        return '<input type="checkbox" name="status" value="' + res.userId + '" lay-filter="status" lay-skin="switch" lay-text="正常|冻结" ' + flag + '>'
+                    }},
+                {title: '操作', minWidth: 300, toolbar: '#currentTableBar', align: "center",fixed:'right',}
+            ]]
+        }
+
+        // 搜索方法
+        userMgr.search = function (){
+            userMgr.condition['condition'] = $('#condition').val()
+            userMgr.condition['timeLimit'] = $('#timeLimit').val()
+            table.reload(userMgr.tableId , {
+                where:userMgr.condition, page:{ curr: 1 }
+            })
+        }
+
+        // ztree单击事件
+        userMgr.zTreeClick = function (e, treeId, data){
+            userMgr.condition['deptId'] = data['id']
+            userMgr.search()
+        }
+
+        // 添加用户
+        userMgr.addUser = function (){
+            layui.sessionData('formOk',{key:'flag',value:false})
+            parent.layer.open({
+                title: '添加用户',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['600px', '100%'],
+                content: '/page/userAdd',
+                end:function (){
+                    // 判断是否添加成功
+                    if(layui.sessionData('formOk').flag){
+                        layer.msg('添加成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+        }
+
+        // 导出用户
+        userMgr.exportUser = function (){
+            var res = table.checkStatus('currentTableId')
+            if(res.data.length === 0){
+                layer.msg('请选择导出内容',{ icon: 2, time:2000, anim:6 })
+            }else{
+                table.exportFile(userMgr.tableId,res.data,'xls')
+            }
+        }
+
+        // 修改用户
+        userMgr.editUser = function(userId){
+            // 先将状态变更成未修改状态
+            layui.sessionData('formOk',{key:'flag',value:false})
+            parent.layer.open({
+                title: '修改用户',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['600px', '100%'],
+                content: '/page/userEdit',
+                end:function (){
+                    // 判断是否修改成功
+                    if(layui.sessionData('formOk').flag){
+                        layer.msg('修改成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+            layui.sessionData('editUser',{key:'userId',value:userId})
+        }
+
+        // 删除用户（逻辑删除）
+        userMgr.deleteUser = function (userId){
+            layer.confirm('是否删除？',{icon:3},function (index) {
+                $.post('/user/deleteUser', {userId: userId}, function (data) {
+                    if (data > 0) {
+                        layer.msg('删除成功', {icon: 1, time: 2000})
+                    } else if (data === -1) {
+                        layer.msg('不能删除管理员', {icon: 2, time: 2000})
+                    } else {
+                        layer.msg('删除失败', {icon: 2, time: 2000})
+                    }
+                    table.reload('currentTableId', {page: {curr: 1}})
+                })
+            })
+        }
+
+        // 重置密码
+        userMgr.reset = function (userId){
+            layer.confirm('是否将密码重置为 111111？',{icon:3},function (index) {
+                $.post('/user/reset', {userId: userId}, function (data) {
+                    if (data > 0) {
+                        layer.msg('重置成功', {icon: 1, time: 2000})
+                    } else {
+                        layer.msg('重置失败', {icon: 2, time: 2000})
+                    }
+                })
+            })
+        }
+
+        // 分配角色
+        userMgr.changeRole = function (userId,roleId){
+            layui.sessionData('formOk',{key:'flag',value:false})
+            parent.layer.open({
+                title: '分配角色',
+                type: 2,
+                shade: 0.2,
+                maxmin:true,
+                shadeClose: true,
+                area: ['250px', '400px'],
+                content: '/page/userChangeRole',
+                end:function (){
+                    // 判断是否分配成功
+                    if(layui.sessionData('formOk').flag){
+                        layer.msg('角色分配成功',{icon:1,time:2000})
+                        table.reload('currentTableId', {page: {curr: 1}})
+                    }
+                }
+            });
+            layui.sessionData('changeRole',{key:'userId',value:userId})
+            layui.sessionData('role',{key:'roleIds',value:roleId})
+        }
+
+        // 冻结与解冻用户
+        userMgr.freeze = function (userId,checked){
+            if(checked){
+                $.ajax({
+                    url:'/user/freeze',
+                    data:{userId:userId},
+                    type:'post',
+                    success:function (data){
+                        if(data === 'no'){
+                            layer.msg('不能冻结超级管理员',{ icon: 2, time:2000 })
+                        }else{
+                            layer.msg(data,{ icon: 1, time:2000 })
+                        }
+                        userMgr.search()
+                    },
+                    error:function (msg){
+                        layer.msg('冻结失败',{ icon: 2, time:2000 })
+                    }
+                })
+            }else{
+                $.ajax({
+                    url:'/user/unFreeze',
+                    data:{userId:userId},
+                    type:'post',
+                    success:function (data){
+                        layer.msg(data,{ icon: 1, time:2000 })
+                        userMgr.search()
+                    },
+                    error:function (msg){
+                        layer.msg('解冻失败',{ icon: 2, time:2000 })
+                    }
+                })
+            }
+        }
+
+        // 表格渲染
+        table.render({
+            elem: '#' + userMgr.tableId,
+            url: "/user/queryUserByCondition",
+            where: userMgr.condition,
+            cols: userMgr.initColumn(),
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 10,
+            page: true,
+            skin: 'line'
+        });
+
+        // 时间渲染
+        laydate.render({
+            elem:'#timeLimit',
+            range:true,
+        })
+
+        // 渲染部门树
+        $.post('/dept/getDeptToTree',function (data){
+            ztree.init($('#deptTree'),zTreeSetting,data)
+            $('#deptTree span[treenode_ico]').css('backgroundSize','cover')
+        },'json')
+
+        // 表格操作
+        table.on('tool(currentTableFilter)',function (obj){
+            var data = obj.data
+            if(obj.event === 'delete'){
+                userMgr.deleteUser(data.userId)
+            }else if(obj.event === 'edit'){
+                userMgr.editUser(data.userId)
+            }else if(obj.event === 'reset'){
+                userMgr.reset(data.userId)
+            }else if(obj.event === 'changeRole'){
+                userMgr.changeRole(data.userId,data.roleId)
+            }
+        })
+
+        // 绑定搜索方法
+        $('#searchBtn').on('click',function (){
+            userMgr.search()
+        })
+
+        // 绑定添加按钮
+        $('#addBtn').on('click',function (){
+            userMgr.addUser()
+        })
+
+        // 绑定导出按钮
+        $('#exportBtn').on('click',function (){
+            userMgr.exportUser()
+        })
+
+        // 冻结与解冻用户
+        form.on('switch(status)',function (obj){
+            let userId = obj.elem.value
+            // 选中解冻
+            let checked = !obj.elem.checked
+            userMgr.freeze(userId,checked)
+        })
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <title>用户编辑</title>
+</head>
+<body>
+<form id="userForm" lay-filter="userForm" class="layui-form model-form">
+  <div class="layui-form-item">
+    <label class="layui-form-label">姓名<span style="color: red;">*</span></label>
+    <div class="layui-input-block">
+      <input name="name" placeholder="请输入姓名" type="text" class="layui-input" lay-verify="required" required/>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">出生日期</label>
+    <div class="layui-input-block">
+      <input id="birthday" name="birthday" placeholder="请输入生日" type="text" class="layui-input" autocomplete="off"/>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">邮箱<span style="color: red;">*</span></label>
+    <div class="layui-input-block">
+      <input name="email" placeholder="请输入邮箱" type="text" class="layui-input" lay-verify="required|email" required />
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">性别</label>
+    <div class="layui-input-block">
+      <input type="radio" name="sex" value="M" title="男" checked/>
+      <input type="radio" name="sex" value="F" title="女"/>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">部门<span style="color: red;">*</span></label>
+    <div class="layui-input-block">
+      <select id="deptId" name="deptId" lay-verify="required" lay-search>
+      </select>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">电话</label>
+    <div class="layui-input-block">
+      <input name="phone" placeholder="请输入电话" type="text" class="layui-input"/>
+    </div>
+  </div>
+  <div class="layui-form-item text-right">
+    <div class="layui-input-block">
+      <button id="cancelBtn" class="layui-btn layui-btn-primary" type="button">取消</button>
+      <button class="layui-btn" lay-filter="btnSubmit" lay-submit>保存</button>
+    </div>
+  </div>
+  <input type="hidden" id="userId" name="userId" value="">
+</form>
+</body>
+<script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+  layui.use(['form','laydate'],function (){
+    var form = layui.form,
+        $ = layui.jquery,
+        laydate = layui.laydate
+
+    // 获取用户id
+    var userId = layui.sessionData('editUser').userId
+    $('#userId').val(userId)
+
+    // 填充表单
+    $.post('/user/findUserByUserId',{userId:userId},function (data){
+      form.val('userForm',{
+        'name':data.name,
+        'birthday':data.birthday,
+        'email':data.email,
+        'sex':data.sex,
+        'phone':data.phone,
+      })
+    },'json')
+
+    // 渲染部门下拉框
+    $.ajax({
+      url:'/dept/findDeptToSelect',
+      type:'post',
+      dataType:'json',
+      success:function (data){
+        var str = '<option value=""></option>'
+        for (let i = 0; i < data.length; i++) {
+          str += '<option value="' + data[i]['dept_id'] + '">' + data[i]['full_name'] + '</option>'
+        }
+        $('#deptId option').remove()
+        $('#deptId').append(str)
+        form.render("select")
+      }
+    })
+
+    // 渲染时间选择框
+    laydate.render({
+      elem: '#birthday'
+    });
+
+    form.on('submit(btnSubmit)',function (data){
+      var res = data.field
+      $.ajax({
+        url:'/user/updateUser',
+        data:JSON.stringify(res),
+        type: 'post',
+        contentType:'application/json',
+        success:function (data){
+          // 设定为true用于重载表格
+          layui.sessionData('formOk',{key:'flag',value:true})
+          // 关闭当前窗口
+          parent.layer.close(parent.layer.index)
+        }
+      })
+      return false;
+    })
+
+    $('#cancelBtn').on('click',function (){
+      parent.layer.close(parent.layer.index)
+    })
+  })
+</script>
+</html>

@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.contents.dao.TConsumableslistDao">
+
+    <resultMap type="com.haocai.module.contents.entity.TConsumableslist" id="TConsumableslistMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="no" column="no" jdbcType="VARCHAR"/>
+        <result property="attribute" column="attribute" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="standards" column="standards" jdbcType="VARCHAR"/>
+        <result property="unit" column="unit" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="NUMERIC"/>
+        <result property="number" column="number" jdbcType="NUMERIC"/>
+        <result property="training" column="training" jdbcType="VARCHAR"/>
+        <result property="semester" column="semester" jdbcType="VARCHAR"/>
+        <result property="department" column="department" jdbcType="VARCHAR"/>
+        <result property="operator" column="operator" jdbcType="VARCHAR"/>
+        <result property="auditor" column="auditor" jdbcType="VARCHAR"/>
+        <result property="operatordate" column="operatordate" jdbcType="TIMESTAMP"/>
+        <result property="auditordate" column="auditordate" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="opinion" column="opinion" jdbcType="VARCHAR"/>
+        <result property="mark" column="mark" jdbcType="VARCHAR"/>
+        <result property="operatorname" column="operatorname" jdbcType="VARCHAR"/>
+        <result property="auditorname" column="auditorname" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="TConsumableslistMap">
+        select
+          ID, name, no, attribute, type, standards, unit, price, number, training, semester, department, operator, auditor, operatordate, auditordate, status, opinion, mark, operatorname, auditorname
+        from t_consumableslist
+        where ID = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TConsumableslistMap">
+        select
+          ID, name, no, attribute, type, standards, unit, price, number, training, semester, department, operator, auditor, operatordate, auditordate, status, opinion, mark, operatorname, auditorname
+        from t_consumableslist
+        <where>
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="no != null and no != ''">
+                and no = #{no}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="standards != null and standards != ''">
+                and standards = #{standards}
+            </if>
+            <if test="unit != null and unit != ''">
+                and unit = #{unit}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="training != null and training != ''">
+                and training = #{training}
+            </if>
+            <if test="semester != null and semester != ''">
+                and semester = #{semester}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="operator != null and operator != ''">
+                and operator = #{operator}
+            </if>
+            <if test="auditor != null and auditor != ''">
+                and auditor = #{auditor}
+            </if>
+            <if test="operatordate != null">
+                and operatordate = #{operatordate}
+            </if>
+            <if test="auditordate != null">
+                and auditordate = #{auditordate}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="opinion != null and opinion != ''">
+                and opinion = #{opinion}
+            </if>
+            <if test="mark != null and mark != ''">
+                and mark = #{mark}
+            </if>
+            <if test="operatorname != null and operatorname != ''">
+                and operatorname = #{operatorname}
+            </if>
+            <if test="auditorname != null and auditorname != ''">
+                and auditorname = #{auditorname}
+            </if>
+        </where>
+        limit #{startPage}, #{limit}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from t_consumableslist
+        <where>
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="no != null and no != ''">
+                and no = #{no}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="standards != null and standards != ''">
+                and standards = #{standards}
+            </if>
+            <if test="unit != null and unit != ''">
+                and unit = #{unit}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="training != null and training != ''">
+                and training = #{training}
+            </if>
+            <if test="semester != null and semester != ''">
+                and semester = #{semester}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="operator != null and operator != ''">
+                and operator = #{operator}
+            </if>
+            <if test="auditor != null and auditor != ''">
+                and auditor = #{auditor}
+            </if>
+            <if test="operatordate != null">
+                and operatordate = #{operatordate}
+            </if>
+            <if test="auditordate != null">
+                and auditordate = #{auditordate}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="opinion != null and opinion != ''">
+                and opinion = #{opinion}
+            </if>
+            <if test="mark != null and mark != ''">
+                and mark = #{mark}
+            </if>
+            <if test="operatorname != null and operatorname != ''">
+                and operatorname = #{operatorname}
+            </if>
+            <if test="auditorname != null and auditorname != ''">
+                and auditorname = #{auditorname}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into
+            t_consumableslist(name, attribute, type, standards, unit, price, number, training, semester, department, operator, auditor, operatordate, auditordate, status, opinion, mark, operatorname, auditorname)
+        values
+               (#{name}, #{attribute}, #{type}, #{standards}, #{unit}, #{price}, #{number}, #{training}, #{semester}, #{department}, #{operator}, #{auditor}, #{operatordate}, #{auditordate}, #{status}, #{opinion}, #{mark}, #{operatorname}, #{auditorname})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into t_consumableslist(name, attribute, type, standards, unit, price, number, training, semester, department, operator, auditor, operatordate, auditordate, status, opinion, mark, operatorname, auditorname)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.name}, #{entity.attribute}, #{entity.type}, #{entity.standards}, #{entity.unit}, #{entity.price}, #{entity.number}, #{entity.training}, #{entity.semester}, #{entity.department}, #{entity.operator}, #{entity.auditor}, #{entity.operatordate}, #{entity.auditordate}, #{entity.status}, #{entity.opinion}, #{entity.mark}, #{entity.operatorname}, #{entity.auditorname})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into t_consumableslist(name, attribute, type, standards, unit, price, number, training, semester, department, operator, auditor, operatordate, auditordate, status, opinion, mark, operatorname, auditorname)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.name}, #{entity.attribute}, #{entity.type}, #{entity.standards}, #{entity.unit}, #{entity.price}, #{entity.number}, #{entity.training}, #{entity.semester}, #{entity.department}, #{entity.operator}, #{entity.auditor}, #{entity.operatordate}, #{entity.auditordate}, #{entity.status}, #{entity.opinion}, #{entity.mark}, #{entity.operatorname}, #{entity.auditorname})
+        </foreach>
+        on duplicate key update
+        name = values(name),
+        attribute = values(attribute),
+        type = values(type),
+        standards = values(standards),
+        unit = values(unit),
+        price = values(price),
+        number = values(number),
+        training = values(training),
+        semester = values(semester),
+        department = values(department),
+        operator = values(operator),
+        auditor = values(auditor),
+        operatordate = values(operatordate),
+        auditordate = values(auditordate),
+        status = values(status),
+        opinion = values(opinion),
+        mark = values(mark),
+        operatorname = values(operatorname),
+        auditorname = values(auditorname)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update t_consumableslist
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="attribute != null and attribute != ''">
+                attribute = #{attribute},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="standards != null and standards != ''">
+                standards = #{standards},
+            </if>
+            <if test="unit != null and unit != ''">
+                unit = #{unit},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="number != null">
+                number = #{number},
+            </if>
+            <if test="training != null and training != ''">
+                training = #{training},
+            </if>
+            <if test="semester != null and semester != ''">
+                semester = #{semester},
+            </if>
+            <if test="department != null and department != ''">
+                department = #{department},
+            </if>
+            <if test="operator != null and operator != ''">
+                operator = #{operator},
+            </if>
+            <if test="auditor != null and auditor != ''">
+                auditor = #{auditor},
+            </if>
+            <if test="operatordate != null">
+                operatordate = #{operatordate},
+            </if>
+            <if test="auditordate != null">
+                auditordate = #{auditordate},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="opinion != null and opinion != ''">
+                opinion = #{opinion},
+            </if>
+            <if test="mark != null and mark != ''">
+                mark = #{mark},
+            </if>
+            <if test="operatorname != null and operatorname != ''">
+                operatorname = #{operatorname},
+            </if>
+            <if test="auditorname != null and auditorname != ''">
+                auditorname = #{auditorname},
+            </if>
+        </set>
+        where ID = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from t_consumableslist where ID = #{id}
+    </delete>
+
+</mapper>
+

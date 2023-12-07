@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>耗材添加</title>
+    <!--这种方式导入对学院进行限制 excel不限制-->
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+</head>
+<body>
+<div class="layui-body-header">
+    <span class="layui-body-header-title"></span>
+</div>
+
+<div class="layui-fluid " style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form id="consumableslistForm" lay-filter="consumableslistForm" class="layui-form model-form"
+                  style="max-width: 700px;margin:auto;">
+                <input name="id" type="hidden"/>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">专业名称<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select id="major" name="major" lay-verify="required" lay-filter="major" lay-search
+                                lay-reqtext="专业名称不能为空">
+                            <option value="">请选择专业名称</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">课程名称<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select id="course" name="course" lay-verify="required" lay-filter="course" lay-search
+                                lay-reqtext="课程名称不能为空">
+                            <option value="">请选择课程名称</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">实训项目名称<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select id="training" name="training" lay-filter="training" lay-verify="required" lay-search
+                                lay-reqtext="实训名称不能为空">
+                            <option value="">请输入实训项目名称</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">耗材名称<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input id="name" name="name" placeholder="请输入耗材名称" type="text" class="layui-input"
+                               lay-verify="required" lay-reqtext="耗材名称不能为空" required/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">型号规格及主要<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input id="standards" name="standards" placeholder="请输入型号规格及主要" type="text"
+                               class="layui-input" lay-verify="required" lay-reqtext="耗材规格不能为空" required/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">耗材属性<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select id="attribute" name="attribute" lay-verify="required" lay-reqtext="耗材属性不能为空">
+                            <option value="">请选择耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">耗材类别<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select name="type" id="type" lay-verify="required" lay-reqtext="耗材类别不能为空">
+                            <option value="">请选择耗材类别</option>
+                            <option value="1">酒店食品</option>
+                            <option value="2">金属材料</option>
+                            <option value="3">电子电器</option>
+                            <option value="4">建筑材料</option>
+                            <option value="5">服装服饰</option>
+                            <option value="6">文化绘画</option>
+                            <option value="7">工具仪表</option>
+                            <option value="8">化工药品</option>
+                            <option value="9">气体类</option>
+                            <option value="10">维修保养</option>
+                            <option value="11">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">二级学院<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <select id="department" name="department" lay-verify="required" lay-reqtext="学院不能为空"
+                                required>
+                            <option value="">部门</option>
+                            <option value="智慧学院">智慧学院</option>
+                            <option value="机电学院">机电学院</option>
+                            <option value="艺术学院">艺术学院</option>
+                            <option value="康养学院">康养学院</option>
+                            <option value="建筑学院">建筑学院</option>
+                            <option value="旅游学院">旅游学院</option>
+                            <option value="交通学院">交通学院</option>
+                            <option value="经贸学院">经贸学院</option>
+                            <option value="教育学院">教育学院</option>
+                            <option value="酒店学院">酒店学院</option>
+                            <option value="电商学院">电商学院</option>
+                            <option value="国际学院">国际学院</option>
+                            <option value="海大航海学院">海大航海学院</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">单位<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input id="unit" name="unit" placeholder="请输入单位" type="text" class="layui-input"
+                               lay-verify="required" lay-reqtext="单位不能为空" required/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">耗材单价（元）<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input id="price" name="price" placeholder="请输入耗材单价（元）" type="text" class="layui-input"
+                               lay-verify="required|number" lay-reqtext="单价不能为空" required/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">生均数量<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input id="number" name="number" placeholder="请输入生均数量" type="text" class="layui-input"
+                               lay-verify="required|number" lay-reqtext="生均数量不能为空" required/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">学期<span style="color: red;">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="checkbox" name="semester1" title="1" value="1">
+                        <input type="checkbox" name="semester2" title="2" value="2">
+                        <input type="checkbox" name="semester3" title="3" value="3">
+                        <input type="checkbox" name="semester4" title="4" value="4">
+                        <input type="checkbox" name="semester5" title="5" value="5">
+                        <input type="checkbox" name="semester6" title="6" value="6">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-filter="btnSubmit" lay-submit>&emsp;提交&emsp;</button>
+                        <button class="layui-btn layui-btn-primary" type="button" id="backupPage">&emsp;返回&emsp;
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    layui.use(function () {
+        var $ = layui.jquery;
+        var form = layui.form;
+        var layer = layui.layer //弹层
+
+
+        //查询当前用户登录信息用于权限控制
+        var name = "", //姓名
+            role = "", //职位
+            department = "" //学院
+        window.onload = function () {
+            $.ajax({
+                type: "post",
+                url: "/consumableslist/userData",
+                data: "",
+                datatype: "json",
+                success: function (msg) {
+                    role = msg.data.role;
+                    name = msg.data.name;
+                    department = msg.data.department;
+                    $("#department").val(department)
+                    $("#department").attr("disabled", "disabled");
+                    form.render('select');
+                }
+            })
+        }
+
+
+        //专业渲染(第一步)
+        function initMajorSelect() {
+            $.ajax({
+                type: "post",
+                url: "/consumableslist/initMajorSelect",
+                data: "",
+                datatype: "json",
+                success: function (msg) {
+                    if (msg.status == "1") {
+                        for (var index of msg.data) {
+                            $("#major").append("<option value=" + index.name + ">" + index.name + "</option>");
+                        }
+                    } else {
+                        layer.msg('无数据');
+                    }
+                    form.render('select');
+                },
+                error: function (msg) {
+                    alert("失败");
+                }
+            })
+        }
+        initMajorSelect();
+
+        //联动查询课程(第二步)
+        form.on('select(major)', function (data) {
+            $("#course").empty();
+            $("#course").append("<option value=''>请选择课程</option>");
+            var major = $("#major").val();
+            $.ajax({
+                url: "/consumableslist/addExistCourse?major=" + major,
+                type: "post",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.status == "1") {
+                        for (var index of msg.data) {
+                            $("#course").append("<option value=" + index.name + ">" + index.name + "</option>");
+                        }
+                    }
+                    form.render('select')
+                },
+            })
+        });
+
+        //联动查询实训项目(第三步)
+        form.on('select(course)', function (data) {
+            $("#training").empty();
+            $("#training").append("<option value=''>请选择实训项目名称</option>");
+            var major = $("#major").val();
+            var course = $("#course").val();
+            $.ajax({
+                url: "/consumableslist/selectCourseData?major=" + major + "&name=" + course,
+                type: "get",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg.status == "1") {
+                        var strArray = msg.data[0].training.split(",");
+                        for (var trainingName of strArray) {
+                            $("#training").append("<option value=" + trainingName + ">" + trainingName + "</option>");
+                        }
+                    }
+                    form.render('select');
+                },
+            })
+        });
+
+
+
+
+        //表单提交事件
+        form.on('submit(btnSubmit)', function (data) {
+            var optIDs = '';
+            var optIDs = '';
+            jQuery("input:checkbox[type='checkbox']:checked").each(function () {
+                optIDs += this.value + ',';
+            });
+            if (optIDs.endsWith(',')) {
+                optIDs = optIDs.slice(0, -1); // 去除末尾的逗号
+            }
+            var sendData = {
+                "training": $("#training").val(),
+                "name": $("#name").val(),
+                "standards": $("#standards").val(),
+                "attribute": $("#attribute").val(),
+                "department": $("#department").val(),
+                "unit": $("#unit").val(),
+                "type": $("#type").val(),
+                "price": $("#price").val(),
+                "number": $("#number").val(),
+                "mark": $("#major").val(),
+                "semester": optIDs
+            }
+            $.ajax({
+                type: "post",
+                url: "/consumableslist/addConsumablesList",
+                data: sendData,
+                datatype: "json",
+                success: function (msg) {
+                    if (msg.status == "1") {
+                        var iframeIndex = parent.layer.getFrameIndex(window.name);
+                        parent.layer.msg('添加成功', {icon: 6, time: 2000, anim: 6})
+                        parent.layer.close(iframeIndex);
+                    } else {
+                        layer.msg(msg.message);
+                    }
+                }
+            })
+            return false;
+        });
+
+        $("#backupPage").click(function () {
+            parent.layer.close(parent.layer.index);
+        })
+    });
+</script>
+</html>

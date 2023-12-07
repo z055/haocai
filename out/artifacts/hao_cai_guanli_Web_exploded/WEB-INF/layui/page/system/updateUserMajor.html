@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <title>修改专业</title>
+</head>
+<body>
+<div class="" style="max-width: 700px;margin:auto;">
+    <input type="text" id="consumablesid" value="" name="consumablesid" hidden>
+    <div class="layui-form-item">
+        <div align="center">专业名称</div>
+        <div id="major">
+
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div align="center">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">确认修改</button>
+        </div>
+    </div>
+
+</div>
+</body>
+<script>
+
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+
+        $.ajax({
+            url: "/userMajor/getZhuanYe",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                var allMajor = data.data
+                // 循环生成多个复选框
+                for (var i = 0; i < allMajor.length; i++) {
+                    $("#major").append("<div class=\"layui-input-block\"><label><input type='checkbox' name='major' value='" + allMajor[i] + "'/>" + allMajor[i] + "</label></div>")
+                }
+            }
+        })
+        // 重新渲染表单元素
+        form.render();
+        if (layui.sessionData("user").data.majorName != null) {
+            var boxes = document.getElementsByName("major")
+            if (layui.sessionData("user").data.majorName.indexOf(",") !== -1) {
+                var major = layui.sessionData("user").data.majorName.split(",")
+                for (let i = 0; i < boxes.length; i++) {
+                    for (let j = 0; j < major.length; j++)
+                        if (boxes[i].value === major[j]) {
+                            boxes[i].checked = true;
+                            break
+                        }
+                }
+            } else {
+                for (let i = 0; i < boxes.length; i++) {
+                    if (boxes[i].value === layui.sessionData("user").data.majorName) {
+                        boxes[i].checked = true;
+                        break
+                    }
+                }
+
+            }
+        }
+        //表单提交事件
+        form.on('submit(submitBtn)', function (data) {
+            var checkboxes = $('input[type="checkbox"]');
+            var checkedCheckboxes = checkboxes.filter(':checked');
+            var selectedValues = checkedCheckboxes.map(function () {
+                return $(this).val();
+            }).get();
+            let majorString = selectedValues.join(",")
+            $.ajax({
+                url: "/userMajor/updateMajor",
+                type: "post",
+                dataType: "json",
+                data: "userId=" + layui.sessionData("user").data.userId + "&majorName=" + majorString,
+                success: function (data) {
+                    layui.sessionData('formOk', {key: 'flag', value: true})
+                    parent.layer.close(parent.layer.index);
+                },
+                error: function () {
+                    layer.msg("出错了")
+                }
+            })
+            return false;
+        })
+    })
+</script>
+</html>

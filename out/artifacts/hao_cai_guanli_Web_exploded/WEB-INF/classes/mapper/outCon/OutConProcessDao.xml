@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.outCon.dao.OutConProcessDao">
+
+    <select id="getData" resultType="com.haocai.module.outCon.vo.OutConVo" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select con.id ,con.name,con.number,con.price,con.price*con.number price_z,con.attribute,con.type,con.department,left(con.out_time,19) as out_time,con.con_type,con.standards,con.applicantName,group_concat(su.name) auditName,tk.department_trainmeg conTypeName
+        from t_consumablesout con left join review_table rt on con.review_id = rt.review_id left join sys_user su on su.user_id = rt.re_pe_id  left join trainmeg_keep tk on con.con_type_id = tk.id
+        <where>
+            <trim prefix="(" suffix=")">
+                con.con_type = 1 or con.con_type = 2 or con.con_type = 4
+            </trim>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and tk.department_trainmeg like "%"#{conTypeName}"%"</if>
+            <if test="department!=null">and con.department=#{department}</if>
+            <if test="startTime!=null">and con.out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= con.out_time</if>
+            and out_type = #{out_type}
+            and status_z = 3
+        </where>
+        group by rt.review_id
+        union
+        select con.id ,con.name,con.number,con.price,con.price*con.number price_z,con.attribute,con.type,con.department,left(con.out_time,19) as out_time,con.con_type,con.standards,con.applicantName,group_concat(su.name) auditName,tc.name conTypeName
+        from t_consumablesout con left join review_table rt on con.review_id = rt.review_id left join sys_user su on su.user_id = rt.re_pe_id left join t_course tc on con.con_type_id = tc.id and con.con_type_no = tc.no
+        <where>
+            <trim prefix="(" suffix=")">
+                con.con_type = 3
+            </trim>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and tc.name like "%"#{conTypeName}"%"</if>
+            <if test="department!=null">and con.department=#{department}</if>
+            <if test="startTime!=null">and con.out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= con.out_time</if>
+            and out_type = #{out_type}
+            and status_z = 3
+        </where>
+        group by rt.review_id
+        limit #{page},#{limit}
+    </select>
+    <select id="getCount" resultType="int" parameterType="com.haocai.module.outCon.vo.param.OutVoParam">
+        select count(*) from (
+        select con.id ,con.name,con.number,con.price,con.price*con.number price_z,con.attribute,con.type,con.department,left(con.out_time,19) as out_time,con.con_type,con.standards,con.applicantName,tk.department_trainmeg conTypeName
+        from t_consumablesout con  left join trainmeg_keep tk on con.con_type_id = tk.id
+        <where>
+            <trim prefix="(" suffix=")">
+                con.con_type = 1 or con.con_type = 2 or con.con_type = 4
+            </trim>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and tk.department_trainmeg like "%"#{conTypeName}"%"</if>
+            <if test="department!=null">and con.department=#{department}</if>
+            <if test="startTime!=null">and con.out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= con.out_time</if>
+            and out_type = #{out_type}
+            and status_z = 3
+        </where>
+        union
+        select con.id ,con.name,con.number,con.price,con.price*con.number price_z,con.attribute,con.type,con.department,left(con.out_time,19) as out_time,con.con_type,con.standards,con.applicantName,tc.name
+        from t_consumablesout con  left join t_course tc on con.con_type_id = tc.id and con.con_type_no = tc.no
+        <where>
+            <trim prefix="(" suffix=")">
+                con.con_type = 3
+            </trim>
+            <if test="name!=null">and con.name like "%"#{name}"%" </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+            <if test="conTypeName!=null">and tc.name like "%"#{conTypeName}"%"</if>
+            <if test="department!=null">and con.department=#{department}</if>
+            <if test="startTime!=null">and con.out_time >= cast(#{startTime} as datetime)</if>
+            <if test="endTime!=null">and cast(#{endTime} as datetime) >= con.out_time</if>
+            and out_type = #{out_type}
+            and status_z = 3
+        </where>
+        ) outcon
+    </select>
+    <select id="getDept" resultType="java.lang.String">
+        select full_name from sys_dept where pid = 'b24bec6da213478b92b83a1cc8b28f66'
+    </select>
+    <select id="getMajor" resultType="java.lang.String">
+        select name from zhuanye where department=#{department}
+    </select>
+</mapper>

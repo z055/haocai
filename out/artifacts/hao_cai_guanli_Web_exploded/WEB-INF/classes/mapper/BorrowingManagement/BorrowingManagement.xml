@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.BorrowingManagement.dao.BorrowingManagementDao">
+
+<!--    默认查询所有-->
+    <select id="getAllConsumables" resultType="com.haocai.module.BorrowingManagement.vo.BorrowingManagementVo">
+        select * from t_consumables
+    </select>
+<!--    批量修改可借状态-->
+    <update id="updateStatus" parameterType="com.haocai.module.BorrowingManagement.vo.param.UpParam">
+        update t_consumables set status=#{status} where id in <foreach close=")" collection="ids" item="listItem" open="(" separator=",">
+        #{listItem}
+    </foreach>
+    </update>
+<!--    模糊查询分页查询-->
+    <select id="searchQuery" resultType="com.haocai.module.BorrowingManagement.vo.BorrowingManagementVo">
+        select  con.id id, con.name name,con.number number,  con.status status,con.price price,con.attribute attribute,con.type type,con.con_type
+        from t_consumables con
+        <where>
+            <if test="name!=null"> con.name like "%"#{name}"%" </if>
+            <if test="department!=null">and  con.department=#{department} </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type} </if>
+            <if test="status!=null">and con.status=#{status}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+        </where>
+        limit
+        #{page},#{limit}
+    </select>
+    <select id="getCount" resultType="int">
+        select count(*) count
+        from t_consumables con
+        <where>
+            <if test="name!=null"> con.name like "%"#{name}"%" </if>
+            <if test="department!=null">and  con.department=#{department} </if>
+            <if test="attribute!=null"> and con.attribute=#{attribute}</if>
+            <if test="type!=null">and con.type=#{type} </if>
+            <if test="status!=null">and con.status=#{status}</if>
+            <if test="con_type!=null">and con.con_type=#{con_type}</if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+  <link rel="stylesheet" href="/css/public.css" media="all">
+  <link rel="stylesheet" href="/js/lay-module/step-lay/step.css" media="all">
+  <title>审核流程</title>
+</head>
+<body>
+<div class="layuimini-container">
+  <div class="layuimini-main">
+    <div class="layui-fluid">
+      <div class="layui-card">
+        <div class="layui-card-body" style="padding-top: 40px;">
+          <div class="layui-carousel" id="stepForm" lay-filter="stepForm" style="margin: 0 auto;">
+            <div carousel-item>
+
+              <div>
+                <table class="layui-hide" id="tableId0" lay-filter="tableZero"></table>
+                <button type="button" id="step0" class="layui-btn">下一步</button>
+              </div>
+              <div>
+                <table class="layui-hide" id="tableId1" lay-filter="tableOne"></table>
+                <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                <button type="button" id="step1" class="layui-btn">下一步</button>
+              </div>
+
+
+              <div>
+                <table class="layui-hide" id="tableId2" lay-filter="tableTwo"></table>
+                <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                <button type="button" id="step2" class="layui-btn">下一步</button>
+              </div>
+              <div>
+                <table class="layui-hide" id="tableId3" lay-filter="tableThere"></table>
+                <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                <button type="button" id="complete" class="layui-btn">完成</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+<script>
+  layui.use([ 'form', 'step', 'table'], function () {
+    var $ = layui.$,
+      form = layui.form,
+      step = layui.step,
+      table = layui.table;
+    // 采购编号
+    var ids = layui.sessionData('data').ids
+    // 初始化渲染,idIndex:表格索引,roleName:角色名
+    function initRender(idIndex,roleName){
+      return {
+        elem: '#tableId' + idIndex,
+        url: "/user/getUserByRoleNameToTable",
+        cellMinWidth: 80,
+        cols: [[
+          {type: "radio", width: 50},
+          {field: 'userId',hide:true},
+          {field: 'account', title: '审核人账号', sort: true},
+          {field: 'name', title: '审核人姓名', sort: true},
+          {field: 'email', title: '审核人邮箱', sort: true},
+          {field: 'phone', title: '审核人电话', sort: true},
+        ]],
+        limits: [10, 15, 20, 25, 50, 100],
+        limit: 10,
+        page: true,
+        skin: 'line',
+        where:{
+          // 此处写死==========
+          roleName:roleName
+        }
+      };
+    }
+    table.render(initRender(0,"二级学院管理员"));
+    // 选第1个审核人
+    table.render(initRender(1,"二级学院教学院长"));
+    // 选第2个审核人
+    table.render(initRender(2,"教务处管理员"));
+    // 选第3个审核人
+    table.render(initRender(3,"采购中心"));
+
+    // 分步表单渲染
+    step.render({
+      elem: '#stepForm',
+      filter: 'stepForm',
+      width: '100%', //设置容器宽度
+      stepWidth: '750px',
+      height: '500px',
+      stepItems: [{
+        title: '二级学院管理员'
+      },{
+        title: '二级学院教学院长'
+      }, {
+        title: '教务处管理员'
+      }, {
+        title: '采购中心'
+      }]
+    });
+
+
+    $('#step0').on('click',function (){
+      var count = table.checkStatus('tableId0')
+      if(count.data.length !== 0) {
+        step.next('#stepForm');
+      }else{
+        layer.msg('请选择当前角色审核人',{icon:5,anim:6})
+      }
+    })
+
+    $('#step1').on('click',function (){
+      var count = table.checkStatus('tableId1')
+      if(count.data.length !== 0) {
+        step.next('#stepForm');
+      }else{
+        layer.msg('请选择当前角色审核人',{icon:5,anim:6})
+      }
+    })
+
+    $('#step2').on('click',function (){
+      var count = table.checkStatus('tableId2')
+      if(count.data.length !== 0) {
+        step.next('#stepForm');
+      }else{
+        layer.msg('请选择当前角色审核人',{icon:5,anim:6})
+      }
+    })
+
+    // 点击完成按钮
+    $('#complete').on('click',function (){
+      var count = table.checkStatus('tableId3')
+      if(count.data.length !== 0) {
+        // 将所有审核人id按","拼串
+        var auditIds = ''+ table.checkStatus('tableId0').data[0].userId + ','
+                          + table.checkStatus('tableId1').data[0].userId + ','
+                          + table.checkStatus('tableId2').data[0].userId + ','
+                          + count.data[0].userId;
+
+        // 汇总
+        $.post('/purchase/subPurchase',
+                {auditoid: auditIds,Allid:ids},
+                function (res) {
+          if (res > 0) {
+            layui.sessionData('formOk',{key:'flag',value:true})
+          }
+          parent.layer.close(parent.layer.index)
+        })
+      }else{
+        layer.msg('请选择当前角色审核人',{icon:5,anim:6})
+      }
+    })
+
+    $('.pre').click(function () {
+      step.pre('#stepForm');
+    });
+
+    $('.next').click(function () {
+      step.next('#stepForm');
+    });
+  })
+</script>
+</html>

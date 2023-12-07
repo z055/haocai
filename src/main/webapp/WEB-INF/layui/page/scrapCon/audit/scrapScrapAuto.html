@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>目录审核</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <style>
+        #button_bottom{
+            position: relative;
+            width: 100%;
+        }
+        #timeShow{
+            background: #449FFF;
+            text-align: center;
+            line-height: 38px;
+            color: black;
+            font-size: 16px;
+            width: 300px;
+            height: 38px;
+            border: 1px solid red;
+            border-radius:12px;
+            position: absolute;
+            /*left:860px;*/
+            margin-left: 15px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset" style="position: relative">
+        <legend>搜索信息</legend>
+        <div class="layui-form-item" style="margin:10px">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-input-inline">
+                    <input class="layui-input" id="name"  placeholder="请输耗材名称" type="text">
+                </div>
+                <div class="layui-inline">
+                    <select id="attribute" name="attribute">
+                        <option value="">耗材属性</option>
+                        <option value="1">低值易耗品</option>
+                        <option value="2">低值耐用品</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <select id="type" name="type">
+                        <option value="">耗材类别</option>
+                        <option value="1">酒店食品</option>
+                        <option value="2">金属材料</option>
+                        <option value="3">电子电器</option>
+                        <option value="4">建筑材料</option>
+                        <option value="5">服装服饰</option>
+                        <option value="6">文化绘画</option>
+                        <option value="7">工作仪表</option>
+                        <option value="8">化工药品</option>
+                        <option value="9">气体类</option>
+                        <option value="10">维修保养</option>
+                        <option value="11">其他</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <select id="con_type" name="status">
+                        <option value="">库类别</option>
+                        <option value="1">基本技能</option>
+                        <option value="2"> 生产实训</option>
+                        <option value="3">技能大赛</option>
+                    </select>
+                </div>
+                <div class="layui-inline">
+                    <select id="status" name="status">
+                        <option value="">审核状态</option>
+                        <option value="0">待审核</option>
+                        <option value="1">通过</option>
+                        <option value="2">退回</option>
+                        <option value="3">被退回</option>
+                    </select>
+                </div>
+
+                <button class="layui-btn layui-btn-normal" id="search" name="search" type="button"><i class="layui-icon"></i>查询</button>
+                <button class="layui-btn layui-btn-normal" id="audits" name="search" type="button">批量审核</button>
+                <div id="button_bottom">
+                    <button class="layui-btn  layui-btn-normal" id="showOpinion" name="showOpinion" type="button">查看退回意见</button>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <table class="layui-hide" id="demo" lay-filter="test"></table>
+
+</div>
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-pass" lay-event="audit">审核</a>
+</script>
+</body>
+
+<script>
+
+    //加载模块
+    layui.use(['form', 'table', 'laydate'],function(){ //亦可加载特定模块：layui.use(['layer', 'laydate', function(){
+        //得到各种内置组件
+        var layer = layui.layer //弹层
+            ,laypage = layui.laypage //分页
+            ,laydate = layui.laydate //日期
+            ,table = layui.table //表格
+            ,form=layui.form
+            ,upload = layui.upload
+            ,util = layui.util;
+        var consumListReview = {
+            tableId:'demo',
+            condition:{
+                id:'',
+                review_id:'',
+                project_name:'',
+                before_re:'',
+                re_pe_id:'',
+                after_re:'',
+                status:'',
+                audit_body:'',
+                name:'',
+                attribute:'',
+                type:'',
+                department:''
+            }
+        }
+        $("#audits").click(function (){
+            var data=table.checkStatus('demo').data
+            var id=new Array();
+            var status=new Array();
+            var review_id=new Array();
+            for (let i = 0; i < data.length; i++) {
+                id.push(data[i].id)
+                status.push(data[i].status)
+                review_id.push(data[i].review_id)
+            }
+            console.log(review_id)
+            if (data.length==0){
+                layer.msg("请选择提交的数据",{
+                    icon:2,
+                    shift:6
+                })
+                return
+            }
+            if (status.indexOf("2")!=-1||status.indexOf("1")!=-1){
+                layer.msg("选择的数据有不可提交的",{
+                    icon:2,
+                    shift:6
+                })
+                return;
+            }
+            layer.open({
+                type:2,
+                shadeClose: false,
+                title:"报废审核",
+                content:'/page/scrapReviewPage?review_id='+review_id+"&id="+id+"&status="+status,
+                area:['1000px','600px'],
+                end:function (){
+                    table.reload('demo');
+                    layer.msg("审核完成",{
+                        icon:1,
+                    })
+                }
+            })
+        })
+
+        function initTable() {
+            //执行一个 table 实例
+            //渲染表格初始化
+            table.render({
+                elem: '#demo'
+                ,height: 530
+                ,url: '/outConAuto/getData' //数据接口
+                ,title: '耗材目录'
+                ,page: true //开启分页
+                ,totalRow: true //开启合计行
+                ,where:{"out_type":2}
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field: 'id', title: 'ID', sort: true, fixed: 'left', totalRowText: '合计：',hide:'true'}
+                    ,{field: 'review_id', title: '审核编号',event:'seepage',hide: 'true'}
+                    ,{field: 'project_name', title: '审核项目名称'}
+                    ,{field: 'name', title: '耗材名称'}
+                    ,{field: 'attribute', title: '耗材属性',
+                        templet: function (res) {
+                            switch (res.attribute) {
+                                case '1':
+                                    return '低值易耗品';
+                                case '2':
+                                    return '低值耐用品';
+                                case '1.0':
+                                    return '低值易耗品';
+                                case '2.0':
+                                    return '低值耐用品';
+                            }
+                        }}
+                    ,{field: 'type', title: '耗材类别',
+                        templet: function (res) {
+                            switch (res.type) {
+                                case '1':
+                                    return '酒店食品';
+                                case '2':
+                                    return '金属材料';
+                                case '3':
+                                    return '电子电器';
+                                case '4':
+                                    return '建筑材料';
+                                case '5':
+                                    return '服装服饰';
+                                case '6':
+                                    return '文化绘画';
+                                case '7':
+                                    return '工作仪表';
+                                case '8':
+                                    return '化工药品';
+                                case '9':
+                                    return '气体类';
+                                case '10':
+                                    return '维修保养';
+                                case '11':
+                                    return '其他';
+                                case '1.0':
+                                    return '酒店食品';
+                                case '2.0':
+                                    return '金属材料';
+                                case '3.0':
+                                    return '电子电器';
+                                case '4.0':
+                                    return '建筑材料';
+                                case '5.0':
+                                    return '服装服饰';
+                                case '6.0':
+                                    return '文化绘画';
+                                case '7.0':
+                                    return '工作仪表';
+                                case '8.0':
+                                    return '化工药品';
+                                case '9.0':
+                                    return '气体类';
+                                case '10.0':
+                                    return '维修保养';
+                                case '11.0':
+                                    return '其他';
+                            }
+                        }}
+                    ,{field: 'applicant', title: '申请人',hide: "true"}
+                    ,{field: 'status', title: '审核状态',
+                        templet:function (res){
+                            switch (res.status){
+                                case '0':
+                                    return '待审核';
+                                case '1':
+                                    return '审核通过';
+                                case '2':
+                                    return '退回';
+                                case '3':
+                                    return '被退回';
+                            }
+                        }
+                    }
+                    ,{field: 'audit_body', title: '审核意见',hide: 'true'}
+                    ,{fixed: 'right',title: '操作', width: 150, align:'center', toolbar: '#barDemo'}
+                ]]
+            });
+        }
+        //初始化表格
+        initTable();
+        // 搜索方法
+        consumListReview.search = function (){
+            var queryData = {};
+            queryData['name'] = $('#name').val()
+            queryData['attribute'] = $('#attribute').val()
+            queryData['type'] = $('#type').val()
+            queryData['status'] = $('#status').val()
+            queryData['con_type'] = $('#con_type').val()
+            queryData['out_type'] = "2"
+            table.reload(consumListReview.tableId , {
+                where:queryData, page:{ curr: 1 }
+            })
+        }
+        //绑定查询按钮
+        $("#search").on("click",function(){
+            consumListReview.search();
+        })
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                ,layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'seepage'){
+
+            }else if(layEvent === 'audit'){
+                if (data.status==1||data.status==2){
+                    layer.msg("当前记录无需审核",{
+                        icon:5,
+                        shift:6
+                    })
+                        return
+                }
+                $.ajax({
+                    url:"/outConAuto/showOption?review_id="+data.review_id,
+                    dataType:"json",
+                    success:function(data){
+                        console.log(data)
+                        layui.sessionData('editId',{key:'data',value:data})
+                    },
+                })
+                layer.open({
+                    type:2,
+                    shadeClose: false,
+                    title:"出库审核",
+                    content:'/page/scrapReviewPage?review_id='+data.review_id+"&id="+data.id+"&status="+data.status,
+                    area:['1000px','700px'],
+                    end:function (){
+                        table.reload('demo');
+                        layer.msg("审核完成",{
+                            icon:1,
+                        })
+                    }
+                })
+            }
+        });
+
+        //分页
+        laypage.render({
+            elem: 'pageDemo' //分页容器的id
+            ,count: 1000 //数据总数
+            ,limit: 10 //每页显示的数据条数
+            ,skin: '#1E9FFF' //自定义选中色值
+            //,layout: ['prev', 'page', 'next', 'count', 'limit', 'refresh', 'skip'] //自定义排版
+            ,jump: function(obj, first){
+                if(!first){
+                    layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                }
+            }
+        });
+
+        //查看退回意见
+        consumListReview.showOpinion=function (){
+            var res = table.checkStatus('demo');
+            if(res.data.length === 0){
+                layer.msg('请选择要查看退回意见的数据',{ icon: 2, time:2000, anim:6 })
+            }else if (res.data.length>1){
+                layer.msg('一次仅可以选择一条数据',{ icon: 2, time:2000, anim:6 })
+            }else {
+                $.ajax({
+                    url:"/outConAuto/showOption?review_id="+res.data[0].review_id,
+                    dataType:"json",
+                    success:function(data){
+                        console.log(data)
+                        layer.open({
+                            type: 1
+                            , title: '退回意见'
+                            ,  area:['550px','220px']
+                            , shade: 0.8
+                            , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                            , btnAlign: 'c'
+                            , moveType: 1 //拖拽模式，0或者1
+                            ,content:'<textarea id="opinion"  class="layui-textarea">'+data[0].role+"审核意见："+data[0].audit_body+'\n'+data[1].role+"审核意见："+data[1].audit_body+'</textarea>',
+                        })
+                    },
+                })
+            }
+        }
+        //查看退回意见按钮绑定
+        $("#showOpinion").on("click",function (){
+            consumListReview.showOpinion();
+        })
+
+
+
+
+
+
+
+    });
+
+
+
+</script>
+
+</html>

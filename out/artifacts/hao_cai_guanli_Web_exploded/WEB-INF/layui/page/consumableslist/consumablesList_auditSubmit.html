@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>目录审核</title>
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-body-header">
+    <span class="layui-body-header-title"></span>
+</div>
+
+<div class="layui-fluid " style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form id="consumableslistForm" lay-filter="consumableslistForm" class="layui-form model-form" style="max-width: 700px;margin:auto;">
+                <div class="layui-container">
+                    <div class="layui-row">
+                        <div class="">
+                            <div class="layui-form-item layui-col-md4">
+                                <input id="role1" name="role1" type="hidden" value="二级学院管理员"/>
+                                <label class="layui-form-label">二级学院管理员<span style="color: red">*</span></label>
+                                <div class="layui-input-block">
+                                    <select id="user1" name="user1" lay-verify="required" lay-filter="test" lay-search  lay-reqtext="角色不能为空">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="layui-form-item layui-col-md4">
+                                <input id="role2" name="role2" type="hidden" value="二级学院教学院长"/>
+                                <label class="layui-form-label" >二级学院教学院长<span style="color: red">*</span></label>
+                                <div class="layui-input-block">
+                                    <select id="user2" name="user2" lay-verify="required" lay-filter="test" lay-search  lay-reqtext="角色不能为空">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="layui-form-item layui-col-md4">
+                                <input id="role3" name="role3" type="hidden" value="教务处管理员"/>
+                                <label class="layui-form-label">教务处管理员<span style="color: red">*</span></label>
+                                <div class="layui-input-block">
+                                    <select id="user3" name="user3" lay-verify="required" lay-filter="test" lay-search  lay-reqtext="角色不能为空">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button id="btnSubmit" class="layui-btn" lay-filter="btnSubmit" lay-submit>&emsp;提交&emsp;</button>
+                        <button class="layui-btn layui-btn-primary" type="button" id="backupPage">&emsp;返回&emsp;</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+
+    layui.use(function(){
+        var $ = layui.jquery;
+        var form = layui.form;
+        var reviewId = layui.sessionData("review_id").review_id
+        var projectName = layui.sessionData("projectName").projectName
+        var department = layui.sessionData("department").department
+        for (let i = 0; i < projectName.length; i++) {
+            projectName[i] = projectName[i] + "耗材目录审核";
+            console.log("projectName = " + reviewId[i])
+        }
+
+        var roleName = [$("#role1").val(),$("#role2").val(),$("#role3").val()];
+        var userNum = ['#user1','#user2','#user3']
+        //填充下拉菜单
+        function fillUser (roleName,userNum,index) {
+            if (index==2){
+                department="教务处"
+            }
+            $.ajax({
+                url:'/user/getUserByRoleName?roleName='+roleName+'&department='+department,
+                type:'post',
+                dataType:'json',
+                success:function (data){
+                    var str = '<option value=""></option>'
+                    for (let i = 0; i < data.length; i++) {
+                        str += '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    }
+                    $(''+userNum+' option').remove()
+                    $(''+userNum+'').append(str)
+                    form.render("select")
+                }
+            })
+        }
+
+        for (var i = 0; i < 3; i++) {
+            fillUser(roleName[i],userNum[i],i)
+        }
+
+
+        //表单提交事件
+        form.on('submit(btnSubmit)', function (data) {
+            $( this ).attr( "disabled" , "disabled" );
+            console.log(data.field)
+            var userId = [data.field.user1, data.field.user2, data.field.user3,]
+            var sendData={
+                 reviewId,
+                 projectName,
+                 userId,
+                 roleName,
+            }
+            $.ajax({
+                type:"post",
+                url:"/shenhe/insert",
+                data: {"list":JSON.stringify(sendData)},
+                conType:'application/json',
+                datatype:"json",
+                success:function (res){
+                    console.log(res);
+                    //修改目录提交审核状态
+                    $.ajax({
+                        type:"post",
+                        url:"/consumableslist/auditSubmit?review_ids="+reviewId,
+                        data:"",
+                        datatype:"json",
+                        success:function (res){
+                            console.log(res)
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.msg("提交成功",{icon: res.count})
+                            parent.layer.close(iframeIndex);
+                        }
+                    })
+                }
+            })
+            return false;
+        });
+
+        $("#backupPage").click(function (){
+            parent.layer.close(parent.layer.index);
+        })
+    });
+</script>
+</html>

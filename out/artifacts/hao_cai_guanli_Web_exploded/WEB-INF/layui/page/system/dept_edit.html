@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+    <title>添加用户</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <input type="text" id="dept_id" value="" name="dept_id" hidden>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">部门名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="full_name" name="full_name" lay-verify="required" lay-reqtext="部门名称不能为空" placeholder="请输入部门名称" value="" class="layui-input">
+            <tip>填写部门名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">部门编号</label>
+        <div class="layui-input-block">
+            <input type="text" id="simple_name" name="simple_name" lay-verify="required" lay-reqtext="部门编号不能为空" placeholder="请输入部门编号" value="" class="layui-input">
+            <tip>填写部门编号。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">上级部门</label>
+        <div class="layui-input-block">
+            <select id="pid" name="pid" lay-verify="required" lay-reqtext="请选择上级部门" lay-search>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">确认添加</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.$;
+        var data = layui.sessionData("deptData").data
+        console.log("dept_id"+JSON.stringify(data))
+        $("input")[0].value = data['dept_id']
+        $("input")[1].value = data['full_name']
+        $("input")[2].value = data['simple_name']
+
+        $.ajax({
+            url:'/dept/getPDept',
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                var str = '<option value=""></option>'
+                for (let i = 0; i < data.length; i++) {
+                    str += '<option value="' + data[i]['dept_id'] + '">' + data[i]['full_name'] + '</option>'
+                }
+                $('#pid option').remove()
+                $('#pid').append(str)
+                form.render("select")
+            }
+        })
+
+        //监听提交
+        form.on('submit(submitBtn)', function (data) {
+            console.log(data.field)
+            $.ajax({
+                url: '../dept/editDept',
+                type: 'post',
+                data: JSON.stringify(data.field),
+                contentType: 'application/json',
+                dataType: 'json',
+                success:function (res) {
+                    //layuimini 的关闭iframe命令
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.msg(res.msg,{icon: res.count})
+                    parent.layer.close(iframeIndex);
+                }
+            })
+
+        });
+
+    });
+</script>
+</html>

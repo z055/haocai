@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+    <title>编辑角色</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <input type="text" value="" name="zhuanyeid" hidden>
+        <label class="layui-form-label required">专业名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" lay-verify="required" lay-reqtext="专业名称不能为空" placeholder="请输入专业名称" value="" class="layui-input">
+            <tip>填写专业名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">专业编号</label>
+        <div class="layui-input-block">
+            <input type="text" name="bianhao" lay-verify="required" lay-reqtext="专业编号不能为空" placeholder="请输入专业编号别名" value="" class="layui-input">
+            <tip>填写专业编号。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">所属部门</label>
+        <div class="layui-input-block">
+            <select id="department" name="department" lay-verify="required" lay-reqtext="请选择所属部门" lay-search>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">确认修改</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.$,
+            res = layui.sessionData('major').data
+
+        $("input")[0].value = res.zhuanyeid
+        $("input")[1].value = res.name
+        $("input")[2].value = res.bianhao
+
+        //下拉框填充
+        $.ajax({
+            url:'/dept/findDeptToSelect',
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                console.log(data)
+                var str = '<option value=""></option>'
+                for (let i = 0; i < data.length; i++) {
+                    str += '<option value="' + data[i]['full_name'] + '">' + data[i]['full_name'] + '</option>'
+                }
+                $('#department option').remove()
+                $('#department').append(str)
+                form.render("select")
+            }
+        })
+
+        //监听提交
+        form.on('submit(submitBtn)', function (data) {
+            $.ajax({
+                url: '../zhuanye/editMajor',
+                type: 'post',
+                data: JSON.stringify(data.field),
+                contentType: 'application/json',
+                dataType: 'json',
+                success:function (res) {
+                    console.log(res)
+                    if (res.count==1) {
+                        //向本地存储添加数据
+                        window.parent.layui.sessionData('addFlag',{   //自定义表名
+                            key: 'flag',          //键
+                            value: true               //值
+                        });
+                    } else {
+                        window.parent.layui.sessionData('addFlag',{   //自定义表名
+                            key: 'flag',          //键
+                            value: false               //值
+                        });
+                    }
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.msg(res.msg,{icon: res.count})
+                    parent.layer.close(iframeIndex);
+                }
+            })
+
+        });
+
+    });
+</script>
+</html>

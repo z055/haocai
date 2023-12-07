@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <title>入库提交</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <input type="text" id="consumablesid" value="" name="consumablesid" hidden>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="consumableName" name="consumableName" lay-verify="required" lay-reqtext="耗材名称" placeholder="耗材名称" value="" class="layui-input layui-disabled">
+            <tip>耗材名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材数量</label>
+        <div class="layui-input-block">
+            <input type="text" id="number" name="number" lay-verify="required" lay-reqtext="耗材数量" placeholder="耗材数量" value="" class="layui-input layui-disabled">
+            <tip>耗材数量。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">入库数量</label>
+        <div class="layui-input-block">
+            <input type="number" id="inNumber" name="inNumber" lay-verify="required" lay-reqtext="请输入入库数量" placeholder="请输入入库数量" value="" class="layui-input layui-disabled">
+            <tip>入库数量。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材单价</label>
+        <div class="layui-input-block">
+            <input type="text" id="price" name="price" lay-verify="required" lay-reqtext="耗材单价" placeholder="耗材单价" value="" class="layui-input layui-disabled">
+            <tip>耗材单价。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材属性</label>
+        <div class="layui-input-block">
+            <input type="text" id="attribute" name="attribute" lay-verify="required" lay-reqtext="耗材属性" placeholder="耗材属性" value="" class="layui-input layui-disabled">
+            <tip>耗材属性。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">耗材类型</label>
+        <div class="layui-input-block">
+            <input type="text" id="type" name="type" lay-verify="required" lay-reqtext="耗材类型" placeholder="耗材类型" value="" class="layui-input layui-disabled">
+            <tip>耗材类型。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">所属学院</label>
+        <div class="layui-input-block">
+            <input type="text" id="department" name="department" lay-verify="required" lay-reqtext="所属学院" placeholder="所属学院" value="" class="layui-input layui-disabled">
+            <tip>所属学院。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">库类别</label>
+        <div class="layui-input-block">
+            <select id="conType" name="conType" lay-verify="required" lay-reqtext="请选择库类别" placeholder="请选择库类别" lay-search>
+                <option value="1">技能大赛</option>
+                <option value="2">生产实训</option>
+                <option value="3">基本技能</option>
+                <option value="4">设备维护保养</option>
+            </select>
+            <tip>请选择库类别。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">提交入库</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+
+        var data = layui.sessionData("conData").data
+        console.log("dept_id="+JSON.stringify(data))
+        $("#consumablesid").val(data.consumablesid);
+        $("#consumableName").val(data.consumableName);
+        $("#number").val(data.number);
+        $("#inNumber").val(data.number);
+        $("#price").val(data.price);
+        $("#attribute").val(data.attribute);
+        $("#type").val(data.type);
+        $("#department").val(data.department);
+
+        //监听提交
+        form.on('submit(submitBtn)', function (data) {
+            console.log(data.field)
+            if (inNumber <= 0) {
+                layer.msg("请输入有效字符",{icon: 0})
+                return false;
+            } else if (inNumber > number) {
+                layer.msg("入库数量超过采购数量",{icon: 0})
+                return false
+            }
+            $.ajax({
+                url: '/TConsumables/addInConPage',
+                type: 'post',
+                data: data.field,
+                dataType: 'json',
+                success:function (res) {
+                    //layuimini 的关闭iframe命令
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.msg(res.msg,{icon: res.count})
+                    parent.layer.close(iframeIndex);
+                }
+            })
+
+        });
+
+    });
+</script>
+</html>

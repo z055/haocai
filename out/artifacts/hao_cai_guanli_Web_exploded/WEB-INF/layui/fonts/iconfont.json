@@ -1,0 +1,128 @@
+{
+  "id": "3401205",
+  "name": "haocai",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "28982873",
+      "name": "采购记录",
+      "font_class": "caigoujilu",
+      "unicode": "e749",
+      "unicode_decimal": 59209
+    },
+    {
+      "icon_id": "15969354",
+      "name": "专业",
+      "font_class": "zhuanye",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "5387669",
+      "name": "树状图",
+      "font_class": "shuzhuangtu",
+      "unicode": "eb2c",
+      "unicode_decimal": 60204
+    },
+    {
+      "icon_id": "5485659",
+      "name": "树列表",
+      "font_class": "shuliebiao",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
+      "icon_id": "8387603",
+      "name": "课程管理",
+      "font_class": "kechengguanli",
+      "unicode": "e693",
+      "unicode_decimal": 59027
+    },
+    {
+      "icon_id": "12875080",
+      "name": "耗材目录",
+      "font_class": "haocaimulu",
+      "unicode": "e720",
+      "unicode_decimal": 59168
+    },
+    {
+      "icon_id": "213301",
+      "name": "我的出借",
+      "font_class": "icon05",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "3382426",
+      "name": "出借记录",
+      "font_class": "chujiejilu",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "8432883",
+      "name": "借用管理",
+      "font_class": "ziyuanjieyong",
+      "unicode": "e682",
+      "unicode_decimal": 59010
+    },
+    {
+      "icon_id": "9318785",
+      "name": "采购审核管理",
+      "font_class": "caigoushenheguanli",
+      "unicode": "e612",
+      "unicode_decimal": 58898
+    },
+    {
+      "icon_id": "13928523",
+      "name": "出库审核",
+      "font_class": "chukushenhe",
+      "unicode": "e6ca",
+      "unicode_decimal": 59082
+    },
+    {
+      "icon_id": "704371",
+      "name": "出库管理",
+      "font_class": "chukuguanli",
+      "unicode": "e690",
+      "unicode_decimal": 59024
+    },
+    {
+      "icon_id": "6789076",
+      "name": "出库管理",
+      "font_class": "chukuguanli-",
+      "unicode": "e630",
+      "unicode_decimal": 58928
+    },
+    {
+      "icon_id": "24167353",
+      "name": "采购管理-采购审批",
+      "font_class": "caigouguanli-caigoushenpi",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "24167355",
+      "name": "采购管理-采购需求",
+      "font_class": "caigouguanli-caigouxuqiu",
+      "unicode": "e644",
+      "unicode_decimal": 58948
+    },
+    {
+      "icon_id": "10342102",
+      "name": "数据汇总",
+      "font_class": "shujuhuizong",
+      "unicode": "e625",
+      "unicode_decimal": 58917
+    },
+    {
+      "icon_id": "11399566",
+      "name": "导入",
+      "font_class": "daoru",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <title>采购修改</title>
+</head>
+<body>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form id="consumablespurchaseForm" lay-filter="consumablespurchaseForm" class="layui-form model-form" style="max-width: 700px;margin:auto;">
+            <input type="hidden" name="id" id="id">
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材编号</label>
+                <div class="layui-input-block">
+                    <input id="consumablesid" name="consumablesid"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">二级学院</label>
+                <div class="layui-input-block">
+                    <input id="department" name="department"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材属性</label>
+                <div class="layui-input-block">
+                    <input id="attribute" name="attribute"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材类别</label>
+                <div class="layui-input-block">
+                    <input id="type" name="type"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材规格</label>
+                <div class="layui-input-block">
+                    <input id="standards" name="standards"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">单位</label>
+                <div class="layui-input-block">
+                    <input id="unit" name="unit"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">单价</label>
+                <div class="layui-input-block">
+                    <input id="price" name="price"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">生均数量</label>
+                <div class="layui-input-block">
+                    <input id="studentsavg" name="studentsavg"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">课程名称</label>
+                <div class="layui-input-block">
+                    <input id="coursename" name="coursename"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label" >实训项目</label>
+                <div class="layui-input-block">
+                    <input id="training" name="training"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">学期</label>
+                <div class="layui-input-block">
+                    <input id="semester" name="semester"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材数量</label>
+                <div class="layui-input-block" >
+                    <input  id="number" name="number"  type="text" class="layui-input" lay-verify="required" required disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">库存</label>
+                <div class="layui-input-block" >
+                    <input  id="stock" name="stock" placeholder="请输入学生数量" type="text" class="layui-input" lay-filter="stock" lay-verify="required" required disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">学生数量<span style="color: red;">*</span></label>
+                <div class="layui-input-block" >
+                    <input style="border-color: red" id="studentnumber" name="studentnumber" placeholder="请输入学生数量" type="number" class="layui-input" lay-filter="studentnumber" lay-verify="required" required/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">请输入备注(选填)</label>
+                <div class="layui-input-block">
+                    <input id="mark" name="mark" placeholder="请输入备注" type="text" class="layui-input" />
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-filter="btnSubmit" lay-submit>&emsp;提交&emsp;</button>
+                    <button class="layui-btn layui-btn-primary" type="button" id="cancel">&emsp;返回&emsp;</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+  layui.use(['form'], function () {
+    var $ = layui.jquery,
+        form = layui.form
+        var data = layui.sessionData('editPurchase')['data'],
+        id = data.split(',')[0],
+        consumablesid = data.split(',')[1],
+        studentnumber = data.split(',')[2],
+        number = data.split(',')[3]
+        $('#id').val(id)
+
+    // 表单提交事件
+    form.on('submit(btnSubmit)',function (data){
+        if($('#number').val() <= 0){
+            layer.msg('库存充足，无需采购！',{icon:2,time:2000})
+        }else{
+            $.ajax({
+                url:'/purchase/updatepurchase',
+                type: 'post',
+                contentType:'application/json',
+                data:JSON.stringify(data.field),
+                success:function (res){
+                    if (res === '修改成功'){
+                        layui.sessionData('formOk',{key:'flag',value:true})
+                    }
+                    parent.layer.close(parent.layer.index)
+                }
+            })
+        }
+        return false;
+    })
+
+    // 填充表单
+    $.post('/purchase/changepurchaselist',{id:id,consumablesid:consumablesid},function (res){
+        let result = res[0]
+        form.val('consumablespurchaseForm',{
+            'consumablesid':result.consumablesid,
+            'department':result.department,
+            'name':result.name,
+            'attribute':result.attribute,
+            'type':result.type,
+            'standards':result.standards,
+            'unit':result.unit,
+            'price':result.price,
+            'studentsavg':result.studentsavg,
+            'coursename':result.coursename,
+            'training':result.training,
+            'semester':result.semester,
+            'stock':result.stock,
+            'mark':result.mark,
+            'studentnumber':studentnumber,
+            'number':number,
+        })
+    },'json')
+
+    // 同步改变耗材数量
+    $('#studentnumber').on('input',function (){
+      let studentNumber = $(this).val(),
+          stock = $('#stock').val(),
+          studentSvg = $('#studentsavg').val()
+      let number = studentNumber * studentSvg - stock
+      $('#number').val(number < 0 ? 0 : number)
+    })
+
+    $('#cancel').on('click',function (){
+      parent.layer.close(parent.layer.index)
+    })
+  })
+</script>
+</html>

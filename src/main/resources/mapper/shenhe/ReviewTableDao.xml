@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.shenhe.dao.ShenheDao">
+
+    <resultMap type="com.haocai.module.shenhe.entity.ReviewTable" id="ReviewTableMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="reviewId" column="review_id" jdbcType="VARCHAR"/>
+        <result property="projectName" column="project_name" jdbcType="VARCHAR"/>
+        <result property="beforeRe" column="before_re" jdbcType="VARCHAR"/>
+        <result property="rePeId" column="re_pe_id" jdbcType="VARCHAR"/>
+        <result property="afterRe" column="after_re" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="role" column="role" jdbcType="VARCHAR"/>
+        <result property="auditBody" column="audit_body" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ReviewTableMap">
+        selectwww
+          id, review_id, project_name, before_re, re_pe_id, after_re, status, role, audit_body
+        from review_table
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ReviewTableMap">
+        select
+          id, review_id, project_name, before_re, re_pe_id, after_re, status, role, audit_body
+        from review_table
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="reviewId != null and reviewId != ''">
+                and review_id = #{reviewId}
+            </if>
+            <if test="projectName != null and projectName != ''">
+                and project_name = #{projectName}
+            </if>
+            <if test="beforeRe != null and beforeRe != ''">
+                and before_re = #{beforeRe}
+            </if>
+            <if test="rePeId != null and rePeId != ''">
+                and re_pe_id = #{rePeId}
+            </if>
+            <if test="afterRe != null and afterRe != ''">
+                and after_re = #{afterRe}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="role != null and role != ''">
+                and role = #{role}
+            </if>
+            <if test="auditBody != null and auditBody != ''">
+                and audit_body = #{auditBody}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from review_table
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="reviewId != null and reviewId != ''">
+                and review_id = #{reviewId}
+            </if>
+            <if test="projectName != null and projectName != ''">
+                and project_name = #{projectName}
+            </if>
+            <if test="beforeRe != null and beforeRe != ''">
+                and before_re = #{beforeRe}
+            </if>
+            <if test="rePeId != null and rePeId != ''">
+                and re_pe_id = #{rePeId}
+            </if>
+            <if test="afterRe != null and afterRe != ''">
+                and after_re = #{afterRe}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="role != null and role != ''">
+                and role = #{role}
+            </if>
+            <if test="auditBody != null and auditBody != ''">
+                and audit_body = #{auditBody}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insertShenhe" keyProperty="id" useGeneratedKeys="true">
+        insert into review_table(id,review_id, project_name, before_re, re_pe_id, after_re, status, role, audit_body)
+        values (#{id},#{reviewId}, #{projectName}, #{beforeRe}, #{rePeId}, #{afterRe}, #{status}, #{role}, #{auditBody})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into review_table(project_name, before_re, re_pe_id, after_re, status, role, audit_body)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.projectName}, #{entity.beforeRe}, #{entity.rePeId}, #{entity.afterRe}, #{entity.status}, #{entity.role}, #{entity.auditBody})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into review_table(project_name, before_re, re_pe_id, after_re, status, role, audit_body)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.projectName}, #{entity.beforeRe}, #{entity.rePeId}, #{entity.afterRe}, #{entity.status}, #{entity.role}, #{entity.auditBody})
+        </foreach>
+        on duplicate key update
+        project_name = values(project_name),
+        before_re = values(before_re),
+        re_pe_id = values(re_pe_id),
+        after_re = values(after_re),
+        status = values(status),
+        role = values(role),
+        audit_body = values(audit_body)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update review_table
+        <set>
+            <if test="projectName != null and projectName != ''">
+                project_name = #{projectName},
+            </if>
+            <if test="beforeRe != null and beforeRe != ''">
+                before_re = #{beforeRe},
+            </if>
+            <if test="rePeId != null and rePeId != ''">
+                re_pe_id = #{rePeId},
+            </if>
+            <if test="afterRe != null and afterRe != ''">
+                after_re = #{afterRe},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="role != null and role != ''">
+                role = #{role},
+            </if>
+            <if test="auditBody != null and auditBody != ''">
+                audit_body = #{auditBody},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from review_table where id = #{id}
+    </delete>
+
+</mapper>
+

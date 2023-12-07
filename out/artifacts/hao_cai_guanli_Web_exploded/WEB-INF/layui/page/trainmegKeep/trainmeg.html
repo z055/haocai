@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>实训比赛维护数据首页</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input type="text" required lay-verify="required" placeholder="请输入实训\大赛名称" autocomplete="off"
+                               class="layui-input" id="name">
+                    </div>
+                    <div class="layui-inline">
+                        <select id="conType" name="conType">
+                            <option value="">类别</option>
+                            <option value="1">技能大赛</option>
+                            <option value="2">生产实训</option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" required lay-verify="required" placeholder="请输入责任人" autocomplete="off"
+                               class="layui-input" id="principal">
+                    </div>
+                    <div class="layui-inline">
+                        <select id="department" name="department">
+                            <option value="">部门</option>
+                            <option value="智慧学院">智慧学院</option>
+                            <option value="机电学院">机电学院</option>
+                            <option value="艺术学院">艺术学院</option>
+                            <option value="康养学院">康养学院</option>
+                            <option value="建筑学院">建筑学院</option>
+                            <option value="旅游学院">旅游学院</option>
+                            <option value="交通学院">交通学院</option>
+                            <option value="经贸学院">经贸学院</option>
+                            <option value="教育学院">教育学院</option>
+                            <option value="酒店学院">酒店学院</option>
+                            <option value="电商学院">电商学院</option>
+                            <option value="国际学院">国际学院</option>
+                            <option value="海大航海学院">海大航海学院</option>
+                        </select>
+                    </div>
+                    <button type="button" class="layui-btn layui-btn-normal" id="search">搜索</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="add">添加</button>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <table class="layui-hide" id="demo" lay-filter="currentTableFilter"></table>
+</div>
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-pass" lay-event="update" id="update">修改</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete" id="delete">删除</a>
+</script>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+
+        $.ajax({
+            url: "/inCon/getUserRol",
+            type: "get",
+            success: function (data) {
+                var role = data.split(",")
+                if (role.indexOf("教师") == -1) {
+                    $("#add").remove()
+                }
+            }
+            , error: function () {
+
+            }
+        })
+
+        //监听行工具事件
+        table.on('tool(currentTableFilter)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            console.log(JSON.stringify(data)),
+            layui.sessionData("returnData", {
+                key: 'data',
+                value: data
+            })
+            if (layEvent === 'delete') {
+                    layer.confirm('是否删除该信息？', {
+                        btn: ['确定', '取消'],
+                        shade: false //不显示遮罩
+                    }, function () {
+                        //do something
+                        deleteTrainMeg(data.id)
+                    });
+            } else if (obj.event === 'update') {
+                var index = layer.open({
+                    title: '修改实训、大赛信息',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['50%', '100%'],
+                    content: '/page/updateTrainMeg',
+                    end: function () {
+                        tableInit()
+                    }
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            }
+        });
+
+        function  deleteTrainMeg(index) {
+            $.ajax({
+                url: "/trainMeg/deleteTrainMsgById",
+                type: "post",
+                async: true,
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify(index),
+                dataType: "JSON",
+                success: function (data) {//通过参数来接受服务器返回的内容
+                    if (data.status == 1) {
+                        layer.msg(data.message, {icon: 6});
+                    } else {
+                        layer.msg(data.message, {icon: 5});
+                    }
+                    tableInit()
+
+                },
+            });
+        }
+
+        //搜索功能
+        $("#search").click(function () {
+            tableInit()
+        })
+        var CheckedMgr = {
+            tableId: 'demo',
+        }
+        $("#add").click(function () {
+            layer.open({
+                type: 2,
+                shadeClose: false,
+                content: '/page/addTrainmeg',
+                area: ['1000px', '600px'],
+                end: function () {
+                    tableInit()
+                }
+            })
+        })
+        // 表格渲染
+        tableInit()
+
+        function tableInit() {
+            table.render({
+                elem: '#' + CheckedMgr.tableId
+                ,
+                height: 500
+                ,
+                url: '/trainMeg/selectTrainMsg' //数据接口
+                ,
+                where: {
+                    "department": $("#department").val(),
+                    "name": $("#name").val(),
+                    "principal": $("#principal").val(),
+                    "conType": $("#conType").val()
+                }
+                ,
+                title: '大赛及实训'
+                ,
+                page: true //开启分页
+                ,
+                totalRow: true //开启合计行
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    , {field: 'id', title: 'id', hide: 'true'}
+                    , {field: 'depTrainMeg', title: '二级学院:项目名称'}
+                    ,{
+                        field: 'conType', title: '类别',
+                        templet: function (res) {
+                            switch (res.conType) {
+                                case '1':
+                                    return '技能大赛';
+                                case '2':
+                                    return '生产实训';
+                            }
+                        }
+                    }
+                    ,{field: 'principal', title: '责任人'}
+                    ,{fixed: 'right', title: '操作', align: 'center', toolbar: '#barDemo'}
+                ]]
+            });
+        }
+    })
+</script>
+</html>

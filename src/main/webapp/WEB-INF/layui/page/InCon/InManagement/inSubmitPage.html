@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>目录审核</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../../lib/layui-v2.6.3/layui.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-body-header">
+    <span class="layui-body-header-title"></span>
+</div>
+
+<div class="layui-fluid " style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form id="consumableslistForm" lay-filter="consumableslistForm" class="layui-form model-form" style="max-width: 700px;margin:auto;">
+                <div class="layui-container">
+                    <div class="layui-row">
+                        <div class="">
+                            <div class="layui-form-item layui-col-md4">
+                                <input id="role1" name="role1" type="hidden" value="二级学院管理员"/>
+                                <label class="layui-form-label">二级学院管理员<span style="color: red">*</span></label>
+                                <div class="layui-input-block">
+                                    <select id="user1" name="user1" lay-verify="required" lay-filter="test" lay-search  lay-reqtext="角色不能为空">
+                                        <option value="">请选择二级学院管理员</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <div class="layui-form-item layui-col-md4">
+                                <input id="role2" name="role2" type="hidden" value="二级学院教学院长"/>
+                                <label class="layui-form-label" >二级学院教学院长<span style="color: red">*</span></label>
+                                <div class="layui-input-block">
+                                    <select id="user2" name="user2" lay-verify="required" lay-filter="test" lay-search  lay-reqtext="角色不能为空">
+                                        <option value="">请选择二级学院教学院长</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-filter="btnSubmit" lay-submit>&emsp;提交&emsp;</button>
+                        <button class="layui-btn layui-btn-primary" type="button" id="backupPage">&emsp;返回&emsp;</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    layui.use(function(){
+        var $ = layui.jquery;
+        var form = layui.form;
+        //获取url传递的参数
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return (r[2]); return null;
+        }
+        //填充下拉菜单
+        var conIds=GetQueryString("ids");
+       var department=layui.sessionData('editId').department
+        var roleName1="二级学院管理员";
+            $.ajax({
+                url:'/user/getUserByRoleName?roleName='+roleName1+"&department="+department,
+                type:'post',
+                dataType:'json',
+                success:function (data){
+                    for (let i = 0; i < data.length; i++) {
+                       const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                        $("#user1").append(str)
+                    }
+                    form.render('select')
+                }
+            })
+        var roleName2="二级学院教学副院长";
+        $.ajax({
+            url:'/user/getUserByRoleName?roleName='+roleName2+"&department="+department,
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#user2").append(str)
+                }
+                form.render('select')
+            }
+        })
+        var roleName3="二级学院教学院长";
+        $.ajax({
+            url:'/user/getUserByRoleName?roleName='+roleName3+"&department="+department,
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                for (let i = 0; i < data.length; i++) {
+                    const str = '<option value="' + data[i]['userId'] + '">' + data[i]['name'] + '</option>'
+                    $("#user2").append(str)
+                }
+                form.render('select')
+            }
+        })
+        //表单提交事件
+        form.on('submit(btnSubmit)', function (data) {
+            $( this ).attr( "disabled" , "disabled" );
+            const role1=data.field.role1;
+            const role2=data.field.role2;
+            const userId1=data.field.user1;
+            const userId2=data.field.user2;
+            const sendData={"role1":role1,"role2":role2,"userId1":userId1,"userId2":userId2,"project_name":"入库审核","ids":conIds}
+            if (userId2==''||userId1==''){
+                layer.msg("请提醒审核人登录系统注册或选择审核人",{
+                    icon:5
+                })
+                return false
+            }
+           else {
+                $.ajax({
+                    url:"/inCon/addReview",
+                    type:"post",
+                    contentType:"application/json",
+                    dataType:"json",
+                    data:JSON.stringify(sendData),
+                    success:function(data){
+                       parent.layer.close(parent.layer.index);
+                    },
+                    error:function (){
+                        layer.msg("出错了")
+                    }
+                })
+                return false;
+            }
+        });
+        $("#backupPage").click(function (){
+            parent.layer.close(parent.layer.index);
+        })
+    });
+</script>
+</html>

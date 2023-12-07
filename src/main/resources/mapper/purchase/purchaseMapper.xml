@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.purchase.dao.purchaseMapper">
+
+        <select id="purchasename" resultType="com.haocai.module.purchase.vo.purchase">
+            select name,standards,id as consumablesid from t_consumableslist where department=#{department}and mark=#{major} and status=1
+        </select>
+<!--        查总条数-->
+    <select id="sel_purchaseallnumber" resultType="Integer">
+        select count(*) from t_consumablespurchase
+    </select>
+<!--    获取角色-->
+<!--    <select id="selRname">-->
+<!--        select Rname from role where Rid=#{rid}-->
+<!--    </select>-->
+<!--    查list表总数-->
+    <select id="sel_listnumber" resultType="Integer">
+        select count(*) from t_consumableslist where department=#{department} and status=1
+    </select>
+<!--    查所有-->
+    <select id="sel_purachaseall" resultType="com.haocai.module.purchase.vo.purchase">
+        select * from  t_consumablespurchase limit #{originate},#{end}
+    </select>
+
+<!--        采购表单信息-->
+        <select id="purchaselist" resultType="com.haocai.module.purchase.vo.purchase" parameterType="com.haocai.module.purchase.vo.purchase">
+            select (case attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute, (
+            case type
+            when 1 then '酒店食品'
+            when 2 then '金属材料'
+            when 3 then '电子电器'
+            when 4 then '建筑材料'
+            when 5 then '服装服饰'
+            when 6 then '文化绘画'
+            when 7 then '工具仪表'
+            when 8 then '化工药品'
+            when 9 then '气体类'
+            when 10 then '维修保养'
+            when 11 then '其他' end) as type,
+            standards as standards,
+            unit as unit,
+            price as price ,
+            l.name as name,
+            l.mark as major,
+            number as numberMark,
+            id as consumablesid,
+            l.training as training,
+--             (select name from t_course c where c.training like concat('%',l.training,'%')) as coursename,
+            semester as semester,
+            department as department
+--             (ifnull ((select sum(number) from t_consumables t where consumablesid=l.id) ,0)) as stock
+             from t_consumableslist l
+            <where>
+                <if test="department != null and department != ''">
+                    department=#{department} and
+                </if>
+                id=#{consumablesid} and l.status = 1
+            </where>
+        </select>
+<!--    采购修改表单展示-->
+        <select id="changepurchaselist" resultType="com.haocai.module.purchase.vo.purchase" parameterType="com.haocai.module.purchase.vo.purchase">
+            select (case attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute, (
+                case type
+                    when 1 then '酒店食品'
+                    when 2 then '金属材料'
+                    when 3 then '电子电器'
+                    when 4 then '建筑材料'
+                    when 5 then '服装服饰'
+                    when 6 then '文化绘画'
+                    when 7 then '工具仪表'
+                    when 8 then '化工药品'
+                    when 9 then '气体类'
+                    when 10 then '维修保养'
+                    when 11 then '其他' end) as type,
+                   standards as standards,
+                   unit as unit,
+                   name as name,
+                   price as price,
+                   id as consumablesid,
+                   number as studentsavg ,
+                   l.training as training,
+                   (select name from t_course c where l.training=c.training) as coursename,
+                   semester as semester,
+                   department as department,
+                   (ifnull((select mark from t_consumablespurchase p where p.ID=#{id}),'')) as mark,
+                   (ifnull ((select sum(number) from t_consumables t where consumablesid=l.id) ,0)) as stock,
+                   (select p.number from t_consumablespurchase p join  t_consumableslist l on p.consumablesid=l.id where p.ID=#{id}) as number ,
+                   (select p.studentnumber from t_consumablespurchase p join  t_consumableslist l on p.consumablesid=l.id where p.ID=#{id}) as studentnumber
+            from t_consumableslist l where l.id=#{consumablesid}
+        </select>
+<!--    采购表单修改-->
+        <update id="updatepurchase" parameterType="com.haocai.module.purchase.vo.purchase">
+            update  t_consumablespurchase set number=#{purchase.number},
+            <if test="purchase.mark!=null and purchase.mark!=''">
+             mark=#{purchase.mark},
+            </if>
+           studentnumber=#{purchase.studentnumber} where ID=#{purchase.id}
+        </update>
+<!--    删除-->
+        <delete id="deletepurchase">
+            delete  from t_consumablespurchase where ID=#{id}
+        </delete>
+<!--    采购表单导入-->
+        <insert id="purchaselistin" parameterType="com.haocai.module.purchase.vo.purchase">
+            insert into t_consumablespurchase(consumablesid,number,department,operator,
+            operatordate,status,studentnumber,price,mark,name,attribute,type,standards,
+            unit,hc_price,stu_number,statu,operatorname)
+            values(#{purchase.consumablesid},#{purchase.number},#{purchase.department},
+            #{purchase.operator},now(),0,#{purchase.studentnumber},
+            #{purchase.price},#{purchase.mark},#{purchase.name},#{purchase.attribute},#{purchase.type},
+            #{purchase.standards},#{purchase.unit},#{purchase.price},#{purchase.studentsavg},"0",#{purchase.operatorname})
+        </insert>
+<!--    采购-->
+        <insert id="purchasecheck" parameterType="com.haocai.module.purchase.vo.purchase">
+            insert into t_consumablespurchase
+                <trim prefix="(" suffix=")" suffixOverrides=",">
+                consumablesid,number,department,operator,operatordate,operatorname,studentnumber,price,status,name,attribute,type,standards,unit,hc_price,stu_number,statu,mark
+                </trim>
+                values
+                <trim prefix="(" suffix=")" suffixOverrides=",">
+                    #{purchase.consumablesid},#{purchase.number},#{purchase.department},#{purchase.operator},now(),#{purchase.operatorname},#{purchase.studentnumber},#{purchase.price},0,#{purchase.name},#{purchase.attribute},#{purchase.type},#{purchase.standards},#{purchase.unit},#{purchase.price},#{purchase.studentsavg},'0',
+                    <if test="purchase.mark!=null and purchase.mark!=''">
+                        #{purchase.mark}
+                    </if>
+                </trim>
+
+        </insert>
+<!--查采购表-->
+        <select id="sel_all" resultType="com.haocai.module.purchase.vo.purchase">
+            SELECT
+                p.consumablesid,
+                l.`name`,
+                l.standards,
+                (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+                (case l.type
+                     when 1 then '酒店食品'
+                     when 2 then '金属材料'
+                     when 3 then '电子电器'
+                     when 4 then '建筑材料'
+                     when 5 then '服装服饰'
+                     when 6 then '文化绘画'
+                     when 7 then '工具仪表'
+                     when 8 then '化工药品'
+                     when 9 then '气体类'
+                     when 10 then '维修保养'
+                     when 11 then '其他' end) as type,
+                p.price,
+                p.number,
+                p.studentnumber,
+                p.department,
+                p.operator,
+                p.operatordate,
+                p.opinion
+            FROM
+                t_consumableslist as l,
+                t_consumablespurchase as p
+            WHERE
+                l.id = p.consumablesid and purchaseid=#{purchaseid} and l.status=1
+        </select>
+<!--    审核查询-->
+    <select id="sel_purchase" resultType="com.haocai.module.purchase.vo.purchase">
+        select * from t_consumablespurchase where status=(#{status}-1) or status=#{status}
+    </select>
+<!--    采购提交查角色-->
+<!--    <select id="">-->
+
+<!--    </select>-->
+<!--    审核-->
+<!--    <update id="">-->
+<!--        update t_consumablespurchase set status=#{status} where ID=#{id}-->
+<!--    </update>-->
+<!--采购提交审核-->
+    <update id="sub_purchase">
+        update t_consumablespurchase set status=#{status} where ID=#{id};
+    </update>
+
+<!--    审核结束入库-->
+    <insert id="addtablein" parameterType="com.haocai.module.purchase.vo.purchase">
+        insert into t_consumablesin(consumablesid,number,department,yearin,status,price) values (#{purchase.consumablesid},#{purchase.number},#{purchase.department},YEAR(now()),0,#{purchase.price})
+    </insert>
+<!--    添加日志-->
+<!--    <insert id="log_purchase" parameterType="com.haocai.module.purchase.vo.purchase">-->
+<!--        insert into log_purchase(consumablesid,number,department,operator,operatordate,status,operatorname,studentnumber,price) values (#{purchase.consumablesid},#{purchase.number},#{purchase.department},#{purchase.operator},date_format("#{purchase.operatordate}","%Y-%m-%d %H:%i:%s"),#{purchase.status},#{purchase.operatorname},#{purchase.studentnumber},#{purchase.price})-->
+<!--    </insert>-->
+<!--    教师查询-->
+    <select id="sel_teacher" resultType="com.haocai.module.purchase.vo.purchase">
+        select (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+               p.mark as mark,
+               (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+               p.consumablesid as consumablesid,
+               p.purchaseid as purchaseid,
+               l.name as name,
+               l.standards as standards,
+               p.price as price,p.number as number,
+               p.department as department,
+               p.status as status,p.mark as mark,
+               p.studentnumber as studentnumber,
+               p.operatorname as operatorname,
+               p.ID as id,
+               p.opinion as opinion,
+               p.stu_number as studentsavg,
+               p.statu as statu,
+               l.unit as unit,
+               l.training as training
+        from t_consumablespurchase p join t_consumableslist l on p.consumablesid=l.id
+            where p.operator=#{purchase.operator}
+        <if test="purchase.consumablesid!=null and purchase.consumablesid!=''">
+            and p.consumablesid=#{purchase.consumablesid}
+        </if>
+        <if test="purchase.status!=null and purchase.status!=''">
+            and p.status=#{purchase.status}
+        </if>
+        <if test="purchase.type!=null and purchase.type!=''">
+            and l.type=#{purchase.type}
+        </if>
+        <if test="purchase.standards!=null and purchase.standards!=''">
+            and l.standards=#{purchase.standards}
+        </if>
+        <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+            and p.operatordate between #{begintime} and #{overtime}
+        </if>
+        <if test="purchase.attribute!=null and purchase.attribute!=''">
+            and l.attribute=#{purchase.attribute}
+        </if>
+        <if test="department!=null and department!=''">
+            and p.department = #{department}
+        </if>
+        <if test="major!=null and major!=''">
+            and p.mark = #{major}
+        </if>
+        limit #{originate},#{end}
+    </select>
+    <select id="sel_teacherprice" resultType="com.haocai.module.purchase.vo.purchase">
+        select (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+        p.mark as mark,
+        (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+        p.consumablesid as consumablesid,
+        p.purchaseid as purchaseid,
+        l.name as name,
+        l.standards as standards,
+        p.price as price,p.number as number,
+        p.department as department,
+        p.status as status,p.mark as mark,
+        p.studentnumber as studentnumber,
+        p.operatorname as operatorname,
+        p.ID as id,
+        p.opinion as opinion,
+        p.stu_number as studentsavg,
+        p.statu ,
+        l.unit as unit,
+        l.training as training
+        from t_consumablespurchase p join t_consumableslist l on p.consumablesid=l.id
+        where p.operator=#{purchase.operator}
+        <if test="purchase.consumablesid!=null and purchase.consumablesid!=''">
+            and p.consumablesid=#{purchase.consumablesid}
+        </if>
+        <if test="purchase.status!=null and purchase.status!=''">
+            and p.status=#{purchase.status}
+        </if>
+        <if test="purchase.type!=null and purchase.type!=''">
+            and l.type=#{purchase.type}
+        </if>
+        <if test="purchase.standards!=null and purchase.standards!=''">
+            and l.standards=#{purchase.standards}
+        </if>
+        <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+            and p.operatordate between #{begintime} and #{overtime}
+        </if>
+        <if test="purchase.attribute!=null and purchase.attribute!=''">
+            and l.attribute=#{purchase.attribute}
+        </if>
+        <if test="department!=null and department!=''">
+            and p.department = #{department}
+        </if>
+        <if test="major!=null and major!=''">
+            and p.mark = #{major}
+        </if>
+    </select>
+
+    <!--    教师查询数量-->
+    <select id="sel_teacherNumber" resultType="Integer">
+        select count(*) from t_consumablespurchase p join t_consumableslist l on p.consumablesid=l.id
+        where p.operator=#{purchase.operator}
+        <if test="purchase.consumablesid!=null and purchase.consumablesid!=''">
+            and p.consumablesid=#{purchase.consumablesid}
+        </if>
+        <if test="purchase.status!=null and purchase.status!=''">
+            and p.status=#{purchase.status}
+        </if>
+        <if test="purchase.type!=null and purchase.type!=''">
+            and l.type=#{purchase.type}
+        </if>
+        <if test="purchase.standards!=null and purchase.standards!=''">
+            and l.standards=#{purchase.standards}
+        </if>
+        <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+            and p.operatordate between #{begintime} and #{overtime}
+        </if>
+        <if test="purchase.attribute!=null and purchase.attribute!=''">
+            and l.attribute=#{purchase.attribute}
+        </if>
+        <if test="department!=null and department!=''">
+            and p.department = #{department}
+        </if>
+        <if test="major!=null and major!=''">
+            and p.mark = #{major}
+        </if>
+    </select>
+<!--    审核提交-->
+        <insert id="shenheliucheng">
+        insert into review_table(id,review_id,project_name,re_pe_id,before_re,after_re,status,audit_body,role)
+
+        values(#{id1},#{purchaseid},'采购',#{one},'',#{two},0,'','二级学院管理员'),
+
+               (#{id2},#{purchaseid},'采购',#{two},#{one},#{three},4,'','二级学院教学院长'),
+
+               (#{id3},#{purchaseid},'采购',#{three},#{two},#{four},4,'','教务处管理员'),
+
+               (#{id4},#{purchaseid},'采购',#{four},#{three},'',4,'','采购中心')
+    </insert>
+<!--    审核流程-->
+
+    <update id="changeliucheng">
+        update review_table set status=#{status} where review_id=#{purchaseid} and role=#{role} and project_name="采购"
+    </update>
+<!--    审核退回-->
+<!--    <update id="backliucheng">-->
+<!--        update review_table set status=2 where shenheid=#{purchaseid} and role=#{role}-->
+<!--    </update>-->
+<!--    查询采购id-->
+    <select id="sel_purchaseid" resultType="String">
+        select purchaseid from t_consumablespurchase where ID=#{id}
+    </select>
+<!--    审核点击页面-->
+    <select id="shenhepage" resultType="com.haocai.module.purchase.vo.purchase">
+        select audit_body as opinion,re_pe_id as auditorname from review_table where review_id=#{purchaseid} and status!=0
+    </select>
+
+<!--    审核意见添加-->
+    <insert id="addopinion">
+       update review_table set audit_body=#{opinion} where review_id=#{purchaseid} and re_pe_id=#{auditorname}
+    </insert>
+
+    <insert id="Rclearopinion">
+        update review_table set audit_body='' where review_id=#{purchaseid}
+    </insert>
+
+    <insert id="Pclearopinion">
+        update t_consumablespurchase set opinion='' where purchaseid=#{purchaseid}
+    </insert>
+<!--    查询状态-->
+    <select id="sel_status" resultType="String">
+        select status from t_consumablespurchase where purchaseid=#{purchaseid}
+    </select>
+
+<!--    查询审核通过的状态-->
+    <select id="gocontinue" resultType="String">
+        select status_n as status from  role_status where role=#{role}
+    </select>
+<!--    查询退回的状态-->
+    <select id="back" resultType="String">
+        select status_y as status from  role_status where role=#{role}
+    </select>
+<!--    其他人查询   通过意见里的账号和流程匹配-->
+
+    <select id="another_sel" resultType="com.haocai.module.purchase.vo.purchase">
+        SELECT
+        p.consumablesid,
+        l.name,
+        l.standards,
+        (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+        (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+        p.price,
+        p.number,
+        p.studentnumber,
+        p.department,
+        p.operatorname,
+        p.auditordate,
+        p.opinion,
+        p.stu_number as studentsavg,
+        r.audit_body as auditBody,
+        r.status,
+        p.purchaseid,
+        p.statu,
+        p.mark
+        FROM
+        ( t_consumablespurchase  p LEFT JOIN t_consumableslist l ON p.consumablesid=l.id)
+        LEFT JOIN review_table r ON p.purchaseid=r.review_id
+        <where>
+            r.re_pe_id=#{purchase.operatorname}
+            <if test="purchase.status!=null and purchase.status!=''">
+                and r.status=#{purchase.status}
+            </if>
+            <if test="purchase.type!=null and purchase.type!=''">
+                and l.type=#{purchase.type}
+            </if>
+            <if test="purchase.standards!=null and purchase.standards!=''">
+                and l.standards=#{purchase.standards}
+            </if>
+            <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+                and p.operatordate between #{begintime} and #{overtime}
+            </if>
+            <if test="purchase.attribute!=null and purchase.attribute!=''">
+                and l.attribute=#{purchase.attribute}
+            </if>
+            <if test="department!=null and department!=''">
+                and p.department = #{department}
+            </if>
+            <if test="major !=null and major!=''">
+                and p.mark=#{major}
+            </if>
+
+        </where>
+        limit #{originate},#{end}
+    </select>
+
+
+    <select id="another_selprice" resultType="com.haocai.module.purchase.vo.purchase">
+        SELECT
+        p.consumablesid,
+        l.name,
+        l.standards,
+        (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+        (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+        p.price,
+        p.number,
+        p.studentnumber,
+        p.department,
+        p.operatorname,
+        p.auditordate,
+        p.stu_number as studentsavg,
+        p.opinion,
+        r.audit_body as auditBody,
+        r.status,
+        p.purchaseid,
+        p.statu
+        FROM
+        ( t_consumablespurchase  p LEFT JOIN t_consumableslist l ON p.consumablesid=l.id)
+        LEFT JOIN review_table r ON p.purchaseid=r.review_id
+        <where>
+            r.re_pe_id=#{purchase.operatorname}
+            <if test="purchase.status!=null and purchase.status!=''">
+                and r.status=#{purchase.status}
+            </if>
+            <if test="purchase.type!=null and purchase.type!=''">
+                and l.type=#{purchase.type}
+            </if>
+            <if test="purchase.standards!=null and purchase.standards!=''">
+                and l.standards=#{purchase.standards}
+            </if>
+            <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+                and p.operatordate between #{begintime} and #{overtime}
+            </if>
+            <if test="purchase.attribute!=null and purchase.attribute!=''">
+                and l.attribute=#{purchase.attribute}
+            </if>
+            <if test="department!=null and department!=''">
+                and p.department = #{department}
+            </if>
+            <if test="major!=null and major!=''">
+                and p.mark = #{major}
+            </if>
+        </where>
+    </select>
+    <!--    根据id查采购表-->
+    <select id="sel_purchase_id" resultType="com.haocai.module.purchase.vo.purchase">
+        select * from t_consumablespurchase where ID=#{id}
+    </select>
+<!--    修改purchaseid-->
+    <update id="changepurchaseid">
+            update t_consumablespurchase set purchaseid=#{purchaseid} where ID=#{id}
+    </update>
+<!--    查询学生数量-->
+    <select id="selstudent" resultType="HashMap">
+        select p.attribute as attribute,
+                   (p.studentnumber)*(p.price)*(p.stu_number) as
+                   totalprice,
+               p.studentnumber as totalstudent
+--                sum((p.studentnumber)*(p.price))
+--
+--             as totalprice,sum(p.studentnumber) as totalstudent
+
+        from t_consumablespurchase p right join review_table s on p.purchaseid=s.review_id
+
+        where purchaseid=#{purchaseid} GROUP BY p.attribute
+    </select>
+<!--    查询类型-->
+    <select id="seltype" resultType="String">
+        select attribute from  t_consumableslist where no=#{no}
+    </select>
+<!--    查编号-->
+    <select id="selno" resultType="String">
+        select consumablesid from t_consumablespurchase where ID=#{id}
+    </select>
+<!--    改状态-->
+    <update id="updatestatus">
+        update t_consumablespurchase set status=#{status} where purchaseid=#{purchaseid}
+    </update>
+<!--        改流程状态-->
+    <update id="updatestatu">
+        update t_consumablespurchase set statu=#{statu} where purchaseid=#{purchaseid}
+    </update>
+<!--    删除流程-->
+    <delete id="delliucheng">
+        delete from purchase_shenheliucheng where shenheid=#{purchaseid}
+    </delete>
+<!--删除意见-->
+    <delete id="delopinion">
+        delete from purchase_shenheyijian where shenheid=#{purchaseid}
+    </delete>
+    <delete id="deleteAll">
+        delete  from review_table where review_id=#{purchaseid}
+    </delete>
+    <delete id="deleteAllP">
+        delete   from t_consumablespurchase where purchaseid=#{purchaseid}
+    </delete>
+
+    <delete id="deletepC">
+                delete   from t_consumablespurchase where consumablesid=#{id}
+    </delete>
+
+
+    <!--    退回意见-->
+    <update id="changeopin">
+        update t_consumablespurchase set opinion =#{opinion} where purchaseid=#{purchaseid}
+    </update>
+    <update id="TuiHuiR">
+        update   review_table  set status ='3' where review_id=#{purchaseid} and re_pe_id=#{operatorname}
+    </update>
+
+    <update id="TuiHuiP">
+        update t_consumablespurchase set  status='3' where purchaseid=#{purchaseid}
+    </update>
+
+    <update id="Ropinion">
+        update review_table set audit_body=#{opinion} where re_pe_id=#{operatorname}
+    </update>
+
+    <update id="updateStudentNumber">
+                update t_consumablespurchase set studentnumber=#{studentNumber} where purchaseid=#{purchaseid}
+
+    </update>
+    <update id="Ropinionone">
+       update review_table set audit_body=#{opinion} where re_pe_id=#{operatorname} and review_id=#{purchaseid}
+    </update>
+
+
+    <select id="selshop" resultType="com.haocai.module.purchase.vo.purchase">
+        select * from t_consumablespurchase where purchaseid=#{purchaseid}
+    </select>
+<!--    库存数量-->
+    <select id="selnumber" resultType="Float">
+        select number from t_consumables where consumablesid=#{consumablesid} and price=#{price}
+    </select>
+<!--    采购流程数量-->
+    <select id="selpurnumber" resultType="Float">
+        select sum(number) from t_consumablespurchase where consumablesid=#{consumablesid} and status!=1 and operator=#{operator}
+    </select>
+<!--        excel模板-->
+    <select id="excel" resultType="com.haocai.module.purchase.vo.purchase">
+        select id,name,attribute,type,standards,unit,price,department,training,number as numberMark ,mark from t_consumableslist where
+       department=#{department}
+          and status=1
+        <if test="major!=null and major!=''">
+            and mark = #{major}
+        </if>
+
+    </select>
+<!--    采购查询全部-->
+    <select id="selpurchaseall" resultType="com.haocai.module.purchase.vo.purchase">
+        SELECT l.name,l.price,l.department,l.standards,p.number,p.operatordate,p.operator FROM t_consumablespurchase p JOIN t_consumableslist l ON l.id=p.consumablesid
+         <where>
+          <if test="department!=null and department!=''">
+              p.department=#{department} and
+          </if>
+          <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+               p.operatordate between #{begintime} and #{overtime}  and
+          </if>
+              p.purchaseid in(select shenheid FROM purchase_shenheliucheng)
+         </where>
+         limit #{originate},#{end}
+    </select>
+    <!--    采购记录总数-->
+    <select id="selpurchaseallCount" resultType="int">
+        SELECT count(*) FROM t_consumablespurchase p JOIN t_consumableslist l ON l.id=p.consumablesid
+        <where>
+            <if test="department!=null and department!=''">
+                p.department=#{department} and
+            </if>
+            <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+                p.operatordate between #{begintime} and #{overtime}  and
+            </if>
+            p.purchaseid in(select shenheid FROM purchase_shenheliucheng)
+        </where>
+    </select>
+<!--    教务处查询-->
+    <select id="jwcsel" resultType="com.haocai.module.purchase.vo.purchase">
+        SELECT
+            p.number,l.name,l.standards,l.type,l.unit,l.price,l.department
+        FROM
+            t_consumablespurchase p
+                JOIN t_consumableslist l ON p.consumablesid=l.id
+        WHERE p.purchaseid IN (SELECT shenheid FROM purchase_shenheliucheng WHERE department=#{department} AND status=5)
+    </select>
+<!--    采购中心查询-->
+    <select id="cgzxsel" resultType="com.haocai.module.purchase.vo.purchase">
+        SELECT
+            SUM(p.number),l.name,l.standards,l.type,l.unit,l.price,group_concat(p.department separator '，')department
+        FROM
+            t_consumablespurchase p
+                JOIN t_consumableslist l ON p.consumablesid=l.id
+        where p.purchaseid IN (SELECT shenheid FROM purchase_shenheliucheng WHERE status=7 or status=5) GROUP BY l.name,l.standards,l.unit,l.price
+    </select>
+<!--    查询审核人-->
+    <select id="auditor" resultType="String">
+        select name from sys_user where user_id=#{auditorid}
+    </select>
+    <select id="judgmentStuts" resultType="java.lang.String">
+        select  status from t_consumablespurchase where id=#{id}
+    </select>
+    <select id="judgmentshenhe" resultType="java.lang.String">
+        select  status from review_table  where review_id=#{purchaseid} and re_pe_id=#{name}
+    </select>
+    <select id="pShenAll" resultType="com.haocai.module.purchase.vo.purchase">
+        select
+        p.purchaseid as purchaseid,
+        l.name as name,
+        l.standards as standards,
+        (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+        (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+        p.price as price,
+        p.studentnumber as studentnumber,
+        p.operatorname as operatorname,
+        p.auditordate as auditordate,
+        p.opinion as opinion
+        from  t_consumablespurchase p
+        JOIN t_consumableslist l ON p.consumablesid=l.id
+        <where>
+            <foreach collection="purchaseid.split(',')" item="purchaseid" open="purchaseid in(" close=")" separator=",">
+                #{purchaseid}
+            </foreach>
+
+        </where>
+    </select>
+    <select id="ListDep" resultType="java.lang.String" >
+        select department from t_consumablespurchase where consumablesid=#{consumablesid} and  operatorname=#{operatorname}
+    </select>
+    <select id="major" resultType="java.lang.String">
+        select major_id as major from sys_user where name=#{name}
+    </select>
+
+
+    <select id="ListDep1" resultType="java.lang.String">
+        select department from t_consumablespurchase
+        where  consumablesid=#{consumablesid}  and operatorname=#{operatorname}
+    </select>
+
+    <select id="majorShen" resultType="java.lang.String">
+                select name as major from zhuanye  where department=#{department}
+    </select>
+
+    <select id="another_selNumber" resultType="java.lang.Integer">
+        SELECT
+count(*)
+        FROM
+        ( t_consumablespurchase  p LEFT JOIN t_consumableslist l ON p.consumablesid=l.id)
+        LEFT JOIN review_table r ON p.purchaseid=r.review_id
+        <where>
+            r.re_pe_id=#{purchase.operatorname}
+            <if test="purchase.status!=null and purchase.status!=''">
+                and r.status=#{purchase.status}
+            </if>
+            <if test="purchase.type!=null and purchase.type!=''">
+                and l.type=#{purchase.type}
+            </if>
+            <if test="purchase.standards!=null and purchase.standards!=''">
+                and l.standards=#{purchase.standards}
+            </if>
+            <if test="begintime!=null and begintime!='' and overtime!=null and overtime!=''">
+                and p.operatordate between #{begintime} and #{overtime}
+            </if>
+            <if test="purchase.attribute!=null and purchase.attribute!=''">
+                and l.attribute=#{purchase.attribute}
+            </if>
+            <if test="department!=null and department!=''">
+                and p.department = #{department}
+            </if>
+            <if test="major !=null and major!=''">
+                and p.mark=#{major}
+            </if>
+        </where>
+    </select>
+    <select id="excelDepartment" resultType="com.haocai.module.purchase.vo.purchase">
+        select (case l.attribute when 1 then '低值易耗品' else '低值耐用品' end) as attribute,
+        p.mark as mark,
+        (case l.type
+        when 1 then '酒店食品'
+        when 2 then '金属材料'
+        when 3 then '电子电器'
+        when 4 then '建筑材料'
+        when 5 then '服装服饰'
+        when 6 then '文化绘画'
+        when 7 then '工具仪表'
+        when 8 then '化工药品'
+        when 9 then '气体类'
+        when 10 then '维修保养'
+        when 11 then '其他' end) as type,
+        p.consumablesid as consumablesid,
+        p.purchaseid as purchaseid,
+        l.name as name,
+        l.standards as standards,
+        p.price as price,p.number as number,
+        p.department as department,
+        p.status as status,p.mark as mark,
+        p.studentnumber as studentnumber,
+        p.operatorname as operatorname,
+        p.ID as id,
+        p.opinion as opinion,
+        p.stu_number as studentsavg,
+        p.statu ,
+        l.unit as unit,
+        l.training as training
+        from t_consumablespurchase p join t_consumableslist l on p.consumablesid=l.id
+        where p.department=#{department}  and p.statu='5'
+    </select>
+</mapper>

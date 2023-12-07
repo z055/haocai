@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <title>采购修改</title>
+</head>
+<body>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form id="consumablespurchaseForm" lay-filter="consumablespurchaseForm" class="layui-form model-form" style="max-width: 700px;margin:auto;">
+            <input type="hidden" name="id" id="id">
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">采购编号</label>
+                <div class="layui-input-block">
+                    <input id="purchaseid" name="purchaseid"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label" >实训项目</label>
+                <div class="layui-input-block">
+                    <input id="training" name="training"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材名称</label>
+                <div class="layui-input-block">
+                    <input id="name" name="name"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材属性</label>
+                <div class="layui-input-block">
+                    <input id="attribute" name="attribute"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">耗材规格</label>
+                <div class="layui-input-block">
+                    <input id="standards" name="standards"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">单位</label>
+                <div class="layui-input-block">
+                    <input id="unit" name="unit"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">单价</label>
+                <div class="layui-input-block">
+                    <input id="price" name="price"  type="text" class="layui-input" disabled/>
+                </div>
+            </div>
+
+
+
+            <div class="layui-form-item" style="height: 30px">
+                <label class="layui-form-label">学生数量<span style="color: red;">*</span></label>
+                <div class="layui-input-block" >
+                    <input style="border-color: red" id="studentnumber" name="studentnumber" placeholder="请输入学生数量" type="number" class="layui-input" lay-filter="studentnumber" lay-verify="required" required/>
+                </div>
+            </div>
+            <div class="layui-form-item" style="height: 30px">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-filter="btnSubmit" lay-submit>&emsp;提交&emsp;</button>
+                    <button class="layui-btn layui-btn-primary" type="button" id="cancel">&emsp;返回&emsp;</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form'], function () {
+        var $ = layui.jquery,
+            form = layui.form
+        var data = layui.sessionData('Rdata')['data']
+        $("#purchaseid").val(data.purchaseid)
+        $("#name").val(data.name)
+        $("#attribute").val(data.attribute)
+        $("#standards").val(data.standards)
+        $("#number").val(data.number)
+        $("#training").val(data.training)
+        $("#price").val(data.price)
+        $("#unit").val(data.unit)
+        $("#studentnumber").val(data.studentnumber)
+
+        // 表单提交事件
+        form.on('submit(btnSubmit)',function (data){
+                $.ajax({
+                    url:'/purchase/Redit',
+                    type: 'post',
+                    contentType:'application/json',
+                    data:JSON.stringify(data.field),
+                    success:function (res){
+                        if (res === '修改成功'){
+                            layui.sessionData('Radit',{key:'flag',value:true})
+                        }
+                        parent.layer.close(parent.layer.index)
+                    }
+                })
+
+            return false;
+        })
+
+
+        $('#cancel').on('click',function (){
+            parent.layer.close(parent.layer.index)
+        })
+    })
+</script>
+</html>

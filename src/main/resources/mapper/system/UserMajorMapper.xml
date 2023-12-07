@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.system.dao.UserMajorMapper">
+    <select id="getAllUser" parameterType="com.haocai.module.system.vo.param.UserMajorParam" resultType="com.haocai.module.system.vo.UserMajor">
+        select user_id userId,name,major_id majorName from sys_user u left join sys_dept d on u.dept_id = d.dept_id
+               <where>
+                   d.full_name = #{deptName}
+                   and role_id like '%1393100649150930946%'
+                   <if test="name != ''">and name like "%"#{name}"%"</if>
+               </where>
+        limit #{page},#{limit}
+    </select>
+    <select id="getAllUserCount" resultType="java.lang.Integer">
+        select count(*) from sys_user u left join sys_dept d on u.dept_id = d.dept_id
+        <where>
+            d.full_name = #{deptName}
+            and role_id like '%1393100649150930946%'
+            <if test="name != ''">and name like "%"#{name}"%"</if>
+        </where>
+    </select>
+    <select id="getZhuanYe" resultType="String">
+        select name from zhuanye where department = #{deptName}
+    </select>
+    <update id="updateUserMajor" parameterType="com.haocai.module.system.vo.UserMajor">
+        update sys_user set major_id = #{majorName} where user_id = #{userId}
+    </update>
+</mapper>

@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/fonts/iconfont.css" media="all">
+    <title>外借管理</title>
+</head>
+<style>
+
+</style>
+<body>
+<div class="layuimini-container">
+    <fieldset class="table-search-fieldset">
+        <legend>搜索信息</legend>
+        <div style="margin: 10px 10px 10px 10px">
+            <form class="layui-form layui-form-pane" action="">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input type="text" required lay-verify="required" placeholder="请输耗材名称" autocomplete="off"
+                               class="layui-input" id="name">
+                    </div>
+                    <div class="layui-inline">
+                        <select id="attribute" name="attribute">
+                            <option value="">耗材属性</option>
+                            <option value="1">低值易耗品</option>
+                            <option value="2">低值耐用品</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select id="type" name="type">
+                            <option value="">耗材类别</option>
+                            <option value="酒店食品">酒店食品</option>
+                            <option value="金属材料">金属材料</option>
+                            <option value="电子电器">电子电器</option>
+                            <option value="建筑材料">建筑材料</option>
+                            <option value="服装服饰">服装服饰</option>
+                            <option value="文化绘画">文化绘画</option>
+                            <option value="工作仪表">工作仪表</option>
+                            <option value="化工药品">化工药品</option>
+                            <option value="气体类">气体类</option>
+                            <option value="维修保养">维修保养</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="layui-inline">
+                        <select id="status_z" name="status_z">
+                            <option value="">审核状态</option>
+                            <option value="1">外借审核中</option>
+                            <option value="2">借出通过</option>
+                            <option value="3">借出驳回</option>
+                            <option value="4">归还审核中</option>
+                            <option value="5">归还驳回</option>
+                            <option value="6">归还通过</option>
+                            <option value="7">已出库</option>
+                            <option value="8">已入库</option>
+                        </select>
+                    </div>
+                    <button type="button" class="layui-btn layui-btn-normal" id="search">搜索</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="del">删除</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="showOpinion">查看审核意见</button>
+                    <!--                    <button type="button" class="layui-btn layui-btn-normal" id="out">批量出库</button>-->
+                    <!--                    <button type="button" class="layui-btn layui-btn-normal" id="storage">批量入库</button>-->
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <table class="layui-hide" id="demo" lay-filter="currentTableFilter"></table>
+</div>
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-pass" lay-event="submitG" id="submitG">归还</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs data-count-pass" lay-event="details" id="details">审核详情</a>
+</script>
+</body>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate
+
+        $.ajax({
+            url: "/inCon/getUserRol",
+            type: "get",
+            success: function (data) {
+                var role = data.split(",")
+                if (role.indexOf("教师") == -1) {
+                    $("#del").remove()
+                    $("#showOpinion").remove()
+                    $("#submitJ").remove()
+                    $("#submitG").remove()
+                }
+            }
+            , error: function () {
+
+            }
+        })
+
+        var consumListBorrow = {
+            tableId: 'demo',
+            condition: {
+                id: "",
+                name: '',
+                department: '',
+                review_id: '',
+                attribute: '',
+                type: '',
+                status: '',
+                number: '',
+                opinion: '',
+                price: "",
+                prices: "",
+                consumablesid: '',
+                status_z: "",
+            }
+        }
+
+        $("#del").click(function () {
+            const data = table.checkStatus("demo").data;
+            if (data.length > 1) {
+                layer.msg('只能一条一条删除', {icon: 5, shift: 6});
+            } else if (data.length == 0) {
+                layer.msg('请选择要删除的数据', {icon: 5, shift: 6});
+            } else if (data[0].status_z == 3 || data[0].status_z == 0) {
+                layer.confirm('确认要删除吗', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    $.ajax({
+                        url: "/sbController/del?id=" + data[0].id + "&review_id=" + data[0].review_id,
+                        type: "post",
+                        contentType: "application/json",
+                        dataType: "json",
+                        success: function (data) {
+                            layer.msg(data.message, {icon: 1});
+                            table.reload('demo');
+                        },
+                    })
+                });
+            } else {
+                layer.msg('不能删除', {icon: 5, shift: 6});
+            }
+        })
+
+        //监听行工具事件
+        table.on('tool(currentTableFilter)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            layui.sessionData("returnData", {
+                key: 'data',
+                value: data
+            })
+            /*if (obj.event === 'submitG') {
+
+                var index = layer.open({
+                    title: '归还提交',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: ['50%', '100%'],
+                    content: '/page/return',
+                    end:function (){
+                        chukuMgr.search(chukuMgr.condition);
+                    }
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                table.reload(chukuMgr.tableId,{where:data,page:{curr:1}})
+                return false;
+            }*/
+            if (layEvent === 'submitJ') {
+                if (data.status_z == 0) {
+                    layui.sessionData('project_name', {key: 'project_name', value: "外借审核"});
+                    layer.open({
+                        type: 2,
+                        shadeClose: false,
+                        content: '/page/SbModuleSubmitPage?department=' + data.department + "&id=" + data.id,
+                        area: ['1000px', '600px'],
+                        end: function () {
+                            table.reload('demo');
+                        }
+                    })
+                } else if (data.status_z == 1) {
+                    layer.msg("外借审核中请勿重复提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 3) {
+                    layer.msg("外借审核已被驳回请删除重新添加", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 2) {
+                    layer.msg("外借审核已通过无法提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else {
+                    layer.msg("正在归还或已归还成功无法提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                }
+            }
+            else if (layEvent === 'submitG') {//最终审核状态 1审核中 2 借出通过  3借出驳回   4归还审核 5归还驳回 6归还通过 7已出库 8已入库
+                if (data.status_z == 1) {
+                    layer.msg("借用审核正在审核，无法归还", {
+                        icon: 5,
+                        shift: 6
+                    })
+                    return false;
+                } else if (data.status_z == 2) {
+                    layer.msg("审核通过，请等待出库", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 3) {
+                    layer.msg("借用审核被驳回，无法归还", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 4) {
+                    layer.msg("归还正在审核中,请勿多次提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 6) {
+                    layer.msg("已成功归还，请勿再次提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 8) {
+                    layer.msg("已成功入库，请勿再次提交", {
+                        icon: 5,
+                        shift: 6
+                    })
+                } else if (data.status_z == 7) {//已出库/*打开归还弹窗*/
+                    layui.sessionData('project_name', {key: 'project_name', value: "归还审核"});
+                    layer.open({
+                        type: 2,
+                        shadeClose: false,
+                        content: '/page/addReturn',
+                        area: ['50%', '100%'],
+                        end: function () {
+                            table.reload('demo');
+                        }
+                    })
+                } else if (data.status_z == 5) {//归还审核被驳回/*打开归还弹窗*/
+                    layer.msg("归还审核被驳回，请重新提交申请", {
+                        icon: 5,
+                        shift: 6
+                    })
+                    layui.sessionData('project_name', {key: 'project_name', value: "归还审核"});
+                    layer.open({
+                        type: 2,
+                        shadeClose: false,
+                        content: '/page/addReturn',
+                        area: ['50%', '100%'],
+                        end: function () {
+                            table.reload('demo');
+                        }
+                    })
+                }
+            }
+            else if (layEvent === 'details') {//查看审核详情
+                layer.open({
+                    type: 2,
+                    shadeClose: false,
+                    content: '/page/sbDetails',
+                    area: ['50%', '100%'],
+                    end: function () {
+                        table.reload('demo');
+                    }
+                })
+            }
+        });
+
+        //搜索功能
+        $("#search").click(function () {
+            tableInit()
+        })
+        var CheckedMgr = {
+            tableId: 'demo',
+        }
+        $("#add").click(function () {
+            layer.open({
+                type: 2,
+                shadeClose: false,
+                content: '/page/addOutCon',
+                area: ['1000px', '600px'],
+                end: function () {
+
+                }
+            })
+        })
+        // 表格渲染
+        tableInit()
+
+        function tableInit() {
+            table.render({
+                elem: '#' + CheckedMgr.tableId
+                ,
+                height: 500
+                ,
+                url: '/sbController/getBorrows' //数据接口
+                ,
+                where: {
+                    "name": $("#name").val(),
+                    "status": $("#status").val(),
+                    // "status_z": $("#status_z").val(),
+                    "attribute": $("#attribute").val(),
+                    "type": $("#type").val(),
+                    "con_type": $("#con_type").val()
+                }
+                ,
+                title: '借用管理'
+                ,
+                page: true //开启分页
+                ,
+                totalRow: true //开启合计行
+                ,
+                cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    , {field: 'id', title: 'ID', hide: 'true'}
+                    , {field: 'name', title: '耗材名称'}
+                    , {field: 'number', title: '数量'}
+                    , {field: 'price', title: '单价'}
+                    , {field: 'prices', title: '总价格'}
+                    , {field: 'department', title: '部门', hide: "true"}
+                    , {
+                        field: 'attribute', title: '属性',
+                        templet: function (res) {
+                            switch (res.attribute) {
+                                case '1':
+                                    return '低值易耗品';
+                                case '2':
+                                    return '低值耐用品';
+                            }
+                        }
+                    },
+                    {field: 'standards', title: '耗材规格'},
+                    {
+                        field: 'con_type', width: 100, title: '库类别',
+                        templet: function (res) {
+                            switch (res.con_type) {
+                                case '1':
+                                    return '技能大赛';
+                                case '2':
+                                    return '生产实训';
+                                case '3':
+                                    return '基本技能';
+                            }
+                        }
+                    },
+                    , {
+                        field: 'type', width: 86, title: '类型',
+                        templet: function (res) {
+                            switch (res.type) {
+                                case '1':
+                                    return '酒店食品';
+                                case '2':
+                                    return '金属材料';
+                                case '3':
+                                    return '电子电器';
+                                case '4':
+                                    return '建筑材料';
+                                case '5':
+                                    return '服装服饰';
+                                case '6':
+                                    return '文化绘画';
+                                case '7':
+                                    return '工作仪表';
+                                case '8':
+                                    return '化工药品';
+                                case '9':
+                                    return '气体类';
+                                case '10':
+                                    return '维修保养';
+                                case '11':
+                                    return '其他';
+                            }
+                        }
+                    },
+                    {field: 'review_id', title: '审核编号', hide: "true"}
+                    , {field: 'opinion', title: '借用审核意见', hide: "true"}
+                    , {field: 'status', title: '审核流程状态', hide: "true"}
+                    , {
+                        field: 'status_z', title: '审核状态', templet: function (res) {
+                            console.log(res)
+                            switch (res.status_z) {
+                                case '1':
+                                    return '外借审核中';
+                                case '2':
+                                    return '外借通过';
+                                case '3':
+                                    return '外借退回';
+                                case '4':
+                                    return '归还审核中';
+                                case '5':
+                                    return '归还驳回';
+                                case '6':
+                                    return '归还通过';
+                                case '7':
+                                    return '已出库';
+                                case '8':
+                                    return '已入库';
+                            }
+                        }
+                    }
+                    ,
+                    {
+                        field: 'status', title: '审核状态', templet: function (res) {
+                            console.log(res)
+                            switch (res.status) {
+                                case '0':
+                                    return '外借审核中';
+                                case '1':
+                                    return '专业负责人外借同意';
+                                case '2':
+                                    return '专业负责人外借退回';
+                                case '3':
+                                    return '二级学院管理员外借同意';
+                                case '4':
+                                    return '二级学院管理员外借退回';
+                                case '5':
+                                    return '二级学院教学(副)院长外借通过';
+                                case '6':
+                                    return '二级学院教学(副)院长外借退回';
+                                case '7':
+                                    return '归还审核中';
+                                case '8':
+                                    return '专业负责人归还同意';
+                                case '9':
+                                    return '专业负责人归还退回';
+                                case '10':
+                                    return '二级学院管理员归还同意';
+                                case '11':
+                                    return '二级学院管理员归还退回';
+                                case '12':
+                                    return '二级学院教学(副)院长归还通过';
+                                case '13':
+                                    return '二级学院教学(副)院长归还退回';
+                            }
+                        }
+                    }
+                    ,
+                    {fixed: 'right', title: '操作', width: 150, align: 'center', toolbar: '#barDemo'}
+                ]]
+            });
+        }
+
+
+        //查看退回意见
+        consumListBorrow.showOpinion = function () {
+            var res = table.checkStatus('demo');
+            if (res.data.length === 0) {
+                layer.msg('请选择要查看退回意见的数据', {icon: 2, time: 2000, anim: 6})
+            } else if (res.data.length > 1) {
+                layer.msg('一次仅可以选择一条数据', {icon: 2, time: 2000, anim: 6})
+            } else {
+                $.ajax({
+                    url:"/sbModuleReview/showOpinion?review_id="+res.data[0].review_id,
+                    dataType:"json",
+                    success:function(data){
+                        console.log(data)
+                        data=data.data;
+                        console.log("aaaaaa" + data[4])
+                        layer.open({
+                            type: 1
+                            , title: '退回意见'
+                            ,  area:['550px','220px']
+                            , shade: 0.8
+                            , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                            , btnAlign: 'c'
+                            , moveType: 1 //拖拽模式，0或者1
+                            ,content:(data[4]==undefined?'<textarea id="opinion"  class="layui-textarea">'+data[0].project_name + data[0].role+"审核意见："+(data[0].audit_body==null?"":data[0].audit_body)+'\n'
+                                +data[1].project_name +data[1].role+"审核意见："+(data[1].audit_body==null?"":data[1].audit_body)+'\n'
+                                +data[2].project_name +data[2].role+"审核意见："+(data[2].audit_body==null?"":data[2].audit_body)+'\n'
+                                +data[3].project_name +data[3].role+"审核意见："+(data[3].audit_body==null?"":data[3].audit_body)+'</textarea>':'<textarea id="opinion"  class="layui-textarea">'+data[0].project_name + data[0].role+"审核意见："+(data[0].audit_body==null?"":data[0].audit_body)+'\n'
+                                +data[1].project_name +data[1].role+"审核意见："+(data[1].audit_body==null?"":data[1].audit_body)+'\n'
+                                +data[2].project_name +data[2].role+"审核意见："+(data[2].audit_body==null?"":data[2].audit_body)+'\n'
+                                +data[3].project_name +data[3].role+"审核意见："+(data[3].audit_body==null?"":data[3].audit_body)+'\n'
+                                +data[4].project_name +data[4].role+"审核意见："+(data[4].audit_body==null?"":data[4].audit_body)+'\n'
+                                +data[5].project_name +data[5].role+"审核意见："+(data[5].audit_body==null?"":data[5].audit_body)+'\n'
+                                +data[6].project_name +data[6].role+"审核意见："+(data[6].audit_body==null?"":data[6].audit_body)+'\n'
+                                +data[7].project_name +data[7].role+"审核意见："+(data[7].audit_body==null?"":data[7].audit_body)+'</textarea>')
+                        })
+                    },
+                })
+              /*  for (index of res.data) {
+                    var opinion = index.opinion;
+                }
+                layer.open({
+                    type: 1
+                    ,
+                    title: '退回意见'
+                    ,
+                    area: ['550px', '220px']
+                    ,
+                    shade: 0.8
+                    ,
+                    id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                    ,
+                    btnAlign: 'c'
+                    ,
+                    moveType: 1 //拖拽模式，0或者1
+                    ,
+                    content: '<textarea id="opinion" placeholder="请输入退回意见" class="layui-textarea">' + opinion + '</textarea>',
+                })*/
+
+            }
+
+        }
+        $("#storage").click(function () {
+            var data = table.checkStatus('demo').data
+            var status = new Array();
+            var status_z = new Array();
+            if (data.length == 0) {
+                layer.msg("请选择的出库数据", {icon: 3});
+                return;
+            }
+            for (var i = 0; i < data.length; i++) {
+                status.push(data[i].status)
+                status_z.push(data[i].status_z)
+            }
+            if (status.indexOf("2") != -1 || status.indexOf("4") != -1 || status.indexOf("6") != -1) {
+                layer.msg("选择的数据有不可提交的", {
+                    icon: 2,
+                    shift: 6
+                })
+                return;
+            }
+            if (status_z.indexOf("4") != -1 || status_z.indexOf("5") != -1 || status_z.indexOf("8") != -1) {
+                layer.msg("选择的数据有不可提交的", {
+                    icon: 2,
+                    shift: 6
+                })
+                return;
+            }
+            $.ajax({
+                url: "/sbController/storageCons",
+                type: "post",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (data) {
+                    layer.msg(data.message, {icon: 1});
+                    table.reload('demo');
+                },
+            })
+        })
+        $("#out").click(function () {
+            var data = table.checkStatus('demo').data
+            var status = new Array();
+            var status_z = new Array();
+            if (data.length == 0) {
+                layer.msg("请选择的出库数据", {icon: 3});
+                return;
+            }
+            for (var i = 0; i < data.length; i++) {
+                status.push(data[i].status)
+                status_z.push(data[i].status_z)
+            }
+            if (status.indexOf("1") != -1 || status.indexOf("3") != -1 || status.indexOf("5") != -1) {
+                layer.msg("选择的数据有不可提交的", {
+                    icon: 2,
+                    shift: 6
+                })
+                return;
+            }
+            if (status_z.indexOf("1") != -1 || status_z.indexOf("3") != -1 || status_z.indexOf("7") != -1) {
+                layer.msg("选择的数据有不可提交的", {
+                    icon: 2,
+                    shift: 6
+                })
+                return;
+            }
+            $.ajax({
+                url: "/sbController/outCons",
+                type: "post",
+                contentType: "application/json",
+                dataType: "json",
+                data: JSON.stringify(data),
+                success: function (data) {
+                    layer.msg(data.message, {icon: 1});
+                    table.reload('demo');
+                },
+            })
+        })
+        //查看退回意见按钮绑定
+        $("#showOpinion").on("click", function () {
+            consumListBorrow.showOpinion();
+        })
+
+    })
+</script>
+</html>

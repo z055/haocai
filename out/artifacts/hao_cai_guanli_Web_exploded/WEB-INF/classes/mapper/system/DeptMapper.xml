@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.system.dao.DeptMapper">
+    <resultMap id="dept" type="Dept">
+        <id property="dept_id" column="dept_id"/>
+        <result property="pid" column="pid"/>
+        <result property="parent_name" column="parent_name"/>
+        <result property="simple_name" column="simple_name"/>
+        <result property="full_name" column="full_name"/>
+        <result property="create_user" column="create_user"/>
+        <result property="update_user" column="update_user"/>
+    </resultMap>
+<!--    <resultMap id="deptTree" type="com.haocai.module.system.vo.ZTreeNode">-->
+<!--        <result property="id" column="dept_id"/>-->
+<!--        <result property="pId" column="pid"/>-->
+<!--        <result property="name" column="full_name"/>-->
+<!--    </resultMap>-->
+
+    <sql id="dept_select_field">
+        p.simple_name as parent_name, s.simple_name, s.full_name , s.dept_id, s.pid, s.dept_id
+    </sql>
+
+    <select id="queryAllCount" resultType="int">
+        select count(*) from sys_dept
+    </select>
+
+    <select id="getPDept" resultMap="dept">
+        select dept_id , full_name
+        FROM sys_dept
+        WHERE pids = '0'
+    </select>
+
+    <select id="getDept" resultMap="dept">
+        select dept_id , full_name
+        FROM sys_dept
+    </select>
+
+    <select id="findDept" resultMap="dept">
+        select
+        <include refid="dept_select_field"/>
+        from
+            sys_dept s
+        LEFT JOIN
+            sys_dept p
+        ON
+            s.pid = p.dept_id
+        <where>
+            <if test="condition!=null and condition !=''">
+                s.simple_name like concat('%',#{condition},'%')
+            </if>
+        </where>
+        limit #{startPage}, #{limit}
+    </select>
+
+    <select id="findName" resultMap="dept">
+        select
+        <include refid="dept_select_field"/>
+        from sys_dept
+        <where>
+            <if test="name!=null and name !=''">
+                simple_name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="addDept" parameterType="com.haocai.module.system.vo.Dept">
+        insert into sys_dept
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                dept_id, simple_name,full_name, pid
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test = "dept_id!=null || dept_id!=''">
+                #{dept_id},
+            </if>
+            <if test = "simple_name!=null || simple_name!=''">
+                #{simple_name},
+            </if>
+            <if test = "full_name!=null || full_name!=''">
+                #{full_name},
+            </if>
+            <if test = "pid!=null || pid!=''">
+                #{pid},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateDept" parameterType="com.haocai.module.system.vo.Dept">
+        update sys_dept
+        SET
+        <if test = "full_name !=null || full_name !=''">
+            simple_name = #{simple_name},
+        </if>
+        <if test = "full_name !=null || full_name !=''">
+            full_name = #{full_name},
+        </if>
+        <if test = "pid!=null">
+            pid = #{pid}
+        </if>
+        WHERE dept_id = #{dept_id}
+    </update>
+
+    <delete id="deleteDept" parameterType="com.haocai.module.system.vo.Dept">
+        delete from sys_dept
+        <where>
+            dept_id = #{dept_id}
+        </where>
+    </delete>
+    <select id="findDeptToSelect" resultMap="dept">
+        select dept_id,full_name from sys_dept
+    </select>
+
+    <select id="getDeptToTree" resultType="map">
+        select d1.dept_id,d1.pid,d1.full_name,(select count(*) from sys_dept d2 where d2.pid in (d1.dept_id)) as sonNum from sys_dept d1
+    </select>
+
+    <select id="getDeptIdBySimpleName" resultType="String">
+        select dept_id from sys_dept where simple_name = #{simpleName}
+    </select>
+
+</mapper>

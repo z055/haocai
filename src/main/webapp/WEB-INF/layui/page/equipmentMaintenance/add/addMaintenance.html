@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加设备维护保养信息</title>
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label required">设备维护保养名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="name" name="name" lay-verify="required" lay-reqtext="设备维护保养名称不能为空"
+                   placeholder="请输入设备维护保养名称"
+                   value="" class="layui-input">
+            <tip>填写设备维护保养名称名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">二级学院</label>
+        <div class="layui-input-block">
+            <select id="department" name="department">
+                <option value="智慧学院">智慧学院</option>
+                <option value="机电学院">机电学院</option>
+                <option value="艺术学院">艺术学院</option>
+                <option value="康养学院">康养学院</option>
+                <option value="建筑学院">建筑学院</option>
+                <option value="旅游学院">旅游学院</option>
+                <option value="交通学院">交通学院</option>
+                <option value="经贸学院">经贸学院</option>
+                <option value="教育学院">教育学院</option>
+                <option value="酒店学院">酒店学院</option>
+                <option value="电商学院">电商学院</option>
+                <option value="国际学院">国际学院</option>
+                <option value="海大航海学院">海大航海学院</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">确认添加</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.$;
+        $.ajax({
+            url: '/maintenance/selectDepartment',
+            type: 'post',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (res) {
+                $("#department").val(res.data)
+                form.render();
+            }
+        })
+        //监听提交
+        form.on('submit(submitBtn)', function (data) {
+            $.ajax({
+                url: '/maintenance/addMaintenance',
+                type: 'post',
+                data: JSON.stringify(data.field),
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (res) {
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    if(res.status === "1"){
+                        parent.layer.msg(res.message, {icon: 1})
+                    }else{
+                        parent.layer.msg(res.message, {icon: 2})
+                    }
+                    parent.layer.close(iframeIndex);
+                }
+            })
+
+        });
+
+    });
+</script>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.warehouse.dao.TConsumablesDao">
+
+    <resultMap type="com.haocai.module.warehouse.entity.TConsumables" id="TConsumablesMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="consumablesid" column="consumablesid" jdbcType="VARCHAR"/>
+        <result property="number" column="number" jdbcType="INTEGER"/>
+        <result property="department" column="department" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="mark" column="mark" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="NUMERIC"/>
+        <result property="consumableName" column="name" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="attribute" column="attribute" jdbcType="VARCHAR"/>
+        <result property="conType" column="con_type" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+
+<!--    &lt;!&ndash;查询指定行数据&ndash;&gt;-->
+<!--    <select id="queryAllByLimit" resultMap="TConsumablesMap">-->
+<!--        select-->
+<!--        c.ID, c.consumablesid,-->
+<!--            (c.number - -->
+<!--                (-->
+<!--                    select ifnull(sum(co.number),0) from t_consumablesout co-->
+<!--                    where co.name = c.name-->
+<!--                    and co.price = c.price-->
+<!--                    and co.attribute = c.attribute-->
+<!--                    and co.type=c.type-->
+<!--                    and co.con_type = c.con_type-->
+<!--                    and co.department=c.department-->
+<!--                    and co.standards=c.standards-->
+<!--                    and (co.con_type_id=c.con_type_id or co.con_type = 3)-->
+<!--                    and (co.status_z=0 or co.status_z=2)-->
+
+<!--                )-->
+<!--            ) as number-->
+<!--        , c.department, c.status, c.mark, c.price, c.name, c.type, c.attribute, c.con_type ,c.standards,c.con_type_id as conTypeId-->
+<!--             ,(-->
+<!--                 select department_trainmeg from trainmeg_keep tk where tk.id = c.con_type_id and tk.conType = c.con_type-->
+<!--                ) as conTypeName-->
+<!--        from t_consumables c-->
+<!--        <where>-->
+<!--            <if test="id != null">-->
+<!--                and c.ID = #{id}-->
+<!--            </if>-->
+<!--            <if test="consumablesid != null and consumablesid != ''">-->
+<!--                and c.consumablesid = #{consumablesid}-->
+<!--            </if>-->
+<!--            <if test="number != null">-->
+<!--                and c.number = #{number}-->
+<!--            </if>-->
+<!--            <if test="department != null and department != ''">-->
+<!--                and c.department = #{department}-->
+<!--            </if>-->
+<!--            <if test="status != null and status != ''">-->
+<!--                and c.status = #{status}-->
+<!--            </if>-->
+<!--            <if test="mark != null and mark != ''">-->
+<!--                and c.mark = #{mark}-->
+<!--            </if>-->
+<!--            <if test="price != null">-->
+<!--                and c.price = #{price}-->
+<!--            </if>-->
+<!--            <if test="consumableName != null and consumableName != ''">-->
+<!--                and c.name like "%"#{consumableName}"%"-->
+<!--            </if>-->
+<!--            <if test="type != null and type != ''">-->
+<!--                and c.type = #{type}-->
+<!--            </if>-->
+<!--            <if test="attribute != null and attribute != ''">-->
+<!--                and c.attribute = #{attribute}-->
+<!--            </if>-->
+<!--            <if test="conType != null and conType != ''">-->
+<!--                and c.con_type = #{conType}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        limit #{page}, #{limit}-->
+<!--    </select>-->
+
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TConsumablesMap">
+        select
+        c.ID, c.consumablesid, c.number, c.department, c.status, c.mark, c.price, c.name, c.type, c.attribute, c.con_type ,c.standards,c.con_type_id as conTypeId
+        ,(
+        select department_trainmeg from trainmeg_keep tk where tk.id = c.con_type_id and tk.conType = c.con_type
+        ) as conTypeName
+        from t_consumables c
+        <where>
+            <if test="id != null">
+                and c.ID = #{id}
+            </if>
+            <if test="consumablesid != null and consumablesid != ''">
+                and c.consumablesid = #{consumablesid}
+            </if>
+            <if test="number != null">
+                and c.number = #{number}
+            </if>
+            <if test="department != null and department != ''">
+                and c.department = #{department}
+            </if>
+            <if test="status != null and status != ''">
+                and c.status = #{status}
+            </if>
+            <if test="mark != null and mark != ''">
+                and c.mark = #{mark}
+            </if>
+            <if test="price != null">
+                and c.price = #{price}
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                and c.name like "%"#{consumableName}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and c.type = #{type}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and c.attribute = #{attribute}
+            </if>
+            <if test="conType != null and conType != ''">
+                and c.con_type = #{conType}
+            </if>
+        </where>
+        limit #{page}, #{limit}
+    </select>
+
+    <!--    查看可借用耗材-->
+    <select id="queryAllByLimit2" resultMap="TConsumablesMap">
+        select
+        ID, consumablesid, number, department, status, mark, price, name, type, attribute, con_type ,standards
+        from t_consumables
+        <where>
+            status = 1
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="consumablesid != null and consumablesid != ''">
+                and consumablesid = #{consumablesid}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="mark != null and mark != ''">
+                and mark = #{mark}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                and name like "%"#{consumableName}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+            <if test="conType != null and conType != ''">
+                and con_type = #{conType}
+            </if>
+        </where>
+        limit #{page}, #{limit}
+    </select>
+
+    <!--查询采购指定行数据-->
+    <select id="queryPurchase" resultMap="TConsumablesMap">
+        select
+        ID, consumablesid, number, department, status, price, name, type, attribute ,standards
+        from t_consumablespurchase
+        <where>
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="consumablesid != null and consumablesid != ''">
+                and consumablesid = #{consumablesid}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                and name = #{consumableName}
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+        </where>
+        limit #{page}, #{limit}
+    </select>
+
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from t_consumables
+        <where>
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="consumablesid != null and consumablesid != ''">
+                and consumablesid = #{consumablesid}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="mark != null and mark != ''">
+                and mark = #{mark}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                and name like "%"#{consumableName}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+            <if test="conType != null and conType != ''">
+                and con_type = #{conType}
+            </if>
+        </where>
+    </select>
+
+    <!--可借用耗材统计总行数-->
+    <select id="count2" resultType="java.lang.Long">
+        select count(1)
+        from t_consumables
+        <where>
+            status = 1
+            <if test="id != null">
+                and ID = #{id}
+            </if>
+            <if test="consumablesid != null and consumablesid != ''">
+                and consumablesid = #{consumablesid}
+            </if>
+            <if test="number != null">
+                and number = #{number}
+            </if>
+            <if test="department != null and department != ''">
+                and department = #{department}
+            </if>
+            <if test="mark != null and mark != ''">
+                and mark = #{mark}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                and name like "%"#{consumableName}"%"
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="attribute != null and attribute != ''">
+                and attribute = #{attribute}
+            </if>
+            <if test="conType != null and conType != ''">
+                and con_type = #{conType}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+
+
+
+<!--    出库申请-->
+    <insert id="addOutCon">
+        insert into t_consumablesout (id,consumablesid, number, department, status, price, name, type, attribute, applicant, OutYear, con_type,out_type,standards)
+        values ( REPLACE(UUID(),"-",""),#{consumablesid}, #{outNumber}, #{department}, #{status},  #{price}, #{consumableName}, #{type}, #{attribute}, #{applicant}, #{year}, #{conType},#{out_type},#{standards})
+    </insert>
+
+    <!--    入库申请-->
+    <insert id="addInCon">
+        insert into t_consumablesin (consumablesid, number, department, status, price, name, type, attribute, applicant, yearin, con_type)
+        values (#{consumablesid}, #{inNumber}, #{department}, #{status},  #{price}, #{consumableName}, #{type}, #{attribute}, #{applicant}, #{year}, #{conType})
+    </insert>
+
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update t_consumables
+        <set>
+            <if test="consumablesid != null and consumablesid != ''">
+                consumablesid = #{consumablesid},
+            </if>
+            <if test="number != null">
+                number = #{number},
+            </if>
+            <if test="department != null and department != ''">
+                department = #{department},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="mark != null and mark != ''">
+                mark = #{mark},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="consumableName != null and consumableName != ''">
+                name = #{consumableName},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="attribute != null and attribute != ''">
+                attribute = #{attribute},
+            </if>
+        </set>
+        where ID = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from t_consumables where ID = #{id}
+    </delete>
+
+</mapper>
+

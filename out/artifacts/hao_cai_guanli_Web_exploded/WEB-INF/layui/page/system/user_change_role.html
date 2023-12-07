@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../lib/zTree/css/zTreeStyle/zTreeStyle.css" media="all">
+    <link rel="stylesheet" href="../../fonts/iconfont.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/zTree/js/jquery.ztree.all.js"></script>
+    <title>选择角色</title>
+</head>
+<body>
+<div class="layui-container">
+    <ul id="roleTree" class="ztree"></ul>
+    <button id="cancelBtn" class="layui-btn layui-btn-primary" type="button">取消</button>
+    <button id="changeBtn" class="layui-btn" type="button" >保存</button>
+</div>
+</body>
+<script src="../../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+  var ztree = $.fn.zTree
+  layui.use(['layer'],function (){
+    var layer = layui.layer,
+        $ = layui.jquery
+    var zTreeSetting = {
+        data:{
+            simpleData:{
+                enable:true,
+                idKey:'id',
+                pIdKey:'pId',
+                rootPId:0
+            },
+      },
+      check:{
+        enable:true,
+        chkboxType:{
+            "Y":"",
+            "N":""
+        }
+      }
+    }
+    var userId = layui.sessionData('changeRole').userId
+    var roleId = layui.sessionData('role').roleIds
+
+
+      $.post('/user/getRoleToTree',{roleIds:roleId},function (data){
+        ztree.init($('#roleTree'),zTreeSetting,data)
+      },'json')
+
+    $('#changeBtn').on('click',function (){
+        var treeObj=ztree.getZTreeObj("roleTree"),
+            nodes=treeObj.getCheckedNodes(true)
+        if(userId === '1'){
+            layer.msg('不能修改管理员角色',{icon:2,time:2000,anim:6})
+            return;
+        }
+        if(nodes.length === 0){
+            layer.msg('请选择角色',{icon:2,time:2000,anim:6})
+            return;
+        }
+        var roleIds = ''
+        for (let i = 0;i < nodes.length;i ++) {
+            roleIds += nodes[i]['id'] + ','
+        }
+        $.post('/user/changeRole',{roleIds:roleIds,userId:userId},function (data){
+            layui.sessionData('formOk',{key:'flag',value:true})
+            parent.layer.close(parent.layer.index)
+        })
+    })
+
+    $('#cancelBtn').on('click',function (){
+        parent.layer.close(parent.layer.index)
+    })
+  })
+</script>
+</html>

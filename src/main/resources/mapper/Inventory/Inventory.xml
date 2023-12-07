@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haocai.module.inventory.dao.InventoryDao">
+        <select id="getInfo" parameterType="com.haocai.module.inventory.vo.param.InventoryParam" resultType="com.haocai.module.inventory.vo.InventoryVo">
+            select  con.id id, con.name name,con.number number,  con.status status,con.price price,con.attribute attribute,con.type type,con.department department,standards,con_type conType,ifnull(substr(department_trainmeg,instr(department_trainmeg,':')+1),'') conName
+            from t_consumables con left join trainmeg_keep tk on con.con_type_id = tk.id
+            <where>
+                <if test="name!=null"> name like "%"#{name}"%" </if>
+                <if test="department!=null">and  department=#{department} </if>
+                <if test="attribute!=null"> and attribute=#{attribute}</if>
+                <if test="conType!=null"> and con_type=#{conType}</if>
+                <if test="type!=null">and type=#{type} </if>
+            </where>
+            limit
+            #{page},#{limit}
+        </select>
+
+    <select id="getCount" resultType="int" parameterType="com.haocai.module.inventory.vo.param.InventoryParam">
+        select count(*) count
+        from t_consumables con
+        <where>
+            <if test="name!=null"> name like "%"#{name}"%" </if>
+            <if test="department!=null">and  department=#{department} </if>
+            <if test="attribute!=null"> and attribute=#{attribute}</if>
+            <if test="conType!=null"> and con_type=#{conType}</if>
+            <if test="type!=null">and type=#{type} </if>
+        </where>
+    </select>
+
+        <select id="getAll" parameterType="com.haocai.module.inventory.vo.param.InventoryParam" resultType="com.haocai.module.inventory.vo.InventoryVo">
+            select  con.id id, con.name name,con.number number,  con.status status,con.price price,con.prices prices,con.attribute attribute,con.type type,con.department department,standards,con_type conType,ifnull(substr(department_trainmeg,instr(department_trainmeg,':')+1),'') conName
+            from t_consumables con left join trainmeg_keep tk on con.con_type_id = tk.id
+            <where>
+                <if test="name!=null"> name like "%"#{name}"%" </if>
+                <if test="department!=null">and  department=#{department} </if>
+                <if test="attribute!=null"> and attribute=#{attribute}</if>
+                <if test="conType!=null"> and con_type=#{conType}</if>
+                <if test="type!=null">and type=#{type} </if>
+            </where>
+
+        </select>
+</mapper>

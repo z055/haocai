@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+    <link rel="stylesheet" href="../../css/public.css">
+    <script src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+    <script src="../../lib/layui-v2.6.3/layui.js"></script>
+    <title>编辑角色</title>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <input type="text" value="" name="menuId" hidden>
+        <label class="layui-form-label required">菜单名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" lay-verify="required" lay-reqtext="菜单名称不能为空" placeholder="请输入菜单名称" value="" class="layui-input">
+            <tip>填写菜单名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">菜单编号</label>
+        <div class="layui-input-block">
+            <input type="text" name="code" lay-verify="required" lay-reqtext="菜单编号不能为空" placeholder="请输入菜单编号别名" value="" class="layui-input">
+            <tip>默认为菜单名称。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">菜单url</label>
+        <div class="layui-input-block">
+            <input type="text" name="href" lay-verify="required" placeholder="请输入菜单url" value="" class="layui-input">
+            <tip>默认为空。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">菜单图标</label>
+        <div class="layui-input-block">
+            <input type="text" name="icon" placeholder="请输入菜单图标" value="" class="layui-input">
+            <tip>默认为空。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">上级菜单</label>
+        <div class="layui-input-block">
+            <select id="pcode" name="pcode" lay-verify="required" lay-search>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否有下级菜单</label>
+        <div class="layui-input-block">
+            <input type="radio" name="sonNum" value="1" title="是"/>
+            <input type="radio" name="sonNum" value="0" title="否" checked/>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="submitBtn">确认修改</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.$,
+            res = layui.sessionData('edit').data
+
+        $("input")[0].value = res.menuId
+        $("input")[1].value = res.title
+        $("input")[2].value = res.code
+        $("input")[3].value = res.href
+        $("input")[4].value = res.icon
+
+        //下拉框填充
+        $.ajax({
+            url:'/menu/getMenu',
+            type:'post',
+            dataType:'json',
+            success:function (data){
+                console.log(data)
+                var str = '<option value=""></option>'
+                for (let i = 0; i < data.length; i++) {
+                    str += '<option value="' + data[i]['menuId'] + '">' + data[i]['title'] + '</option>'
+                }
+                $('#pcode option').remove()
+                $('#pcode').append(str)
+                form.render("select")
+            }
+        })
+
+        //监听提交
+        form.on('submit(submitBtn)', function (data) {
+            $.ajax({
+                url: '../menu/editMenu',
+                type: 'post',
+                data: JSON.stringify(data.field),
+                contentType: 'application/json',
+                dataType: 'json',
+                success:function (res) {
+                    console.log(res)
+                    if (res.count==1) {
+                        //向本地存储添加数据
+                        window.parent.layui.sessionData('addFlag',{   //自定义表名
+                            key: 'flag',          //键
+                            value: true               //值
+                        });
+                    } else {
+                        window.parent.layui.sessionData('addFlag',{   //自定义表名
+                            key: 'flag',          //键
+                            value: false               //值
+                        });
+                    }
+                    var iframeIndex = parent.layer.getFrameIndex(window.name);
+                    parent.layer.close(iframeIndex);
+                }
+            })
+
+        });
+
+    });
+</script>
+</html>

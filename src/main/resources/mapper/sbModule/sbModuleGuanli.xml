@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.haocai.module.sbModule.dao.SbDao">
+    <!--        获取出库表的耗材数量-->
+    <select id="getConOut" parameterType="com.haocai.module.sbModule.vo.ConOut"
+            resultType="com.haocai.module.sbModule.vo.ConOut">
+        select number, status_z
+        from t_consumablesout
+        <where>
+            <if test="name!=null">and name=#{name}</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="attribute!=null">and attribute=#{attribute}</if>
+            <if test="price!=null">and price=#{price}</if>
+            <if test="department!=null">and department=#{department}</if>
+            <if test="standards!=null">and standards=#{standards}</if>
+            <if test="con_type!=null">and con_type=#{con_type}</if>
+        </where>
+    </select>
+
+    <select id="getBorrows" parameterType="com.haocai.module.sbModule.vo.param.SbParam"
+            resultType="com.haocai.module.sbModule.vo.SbVo">
+        select ID ,consumablesid,price, number ,price*number prices,department ,operator, type ,attribute ,name
+        ,review_id ,status_z,status,opinion,con_type,standards
+        from t_consumablesborrow
+        <where>
+            # 查看申请人申请的
+            operator = #{operator}
+            <if test="name!=null">and name like "%"#{name}"%"</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="attribute!=null">and attribute=#{attribute}</if>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+        </where>
+        limit
+        #{page},#{limit}
+    </select>
+    <!--    ↑            <where>-->
+    <!--                        <if test="name!=null">and name=#{name}</if>-->
+    <!--                        <if test="department!=null">and department=#{department}</if>-->
+    <!--                        <if test="operator!=null">and operator=#{operator}</if>-->
+    <!--                        <if test="type!=null">and type=#{type}</if>-->
+    <!--                        <if test="attribute!=null">and attribute=#{attribute}</if>-->
+    <!--                        <if test="LibraryName!=null"> or LibraryName=#{LibraryName}</if>-->
+    <!--                </where>-->
+    <select id="getCount" parameterType="com.haocai.module.sbModule.vo.param.SbParam" resultType="int">
+        select count(id) from t_consumablesborrow
+        <where>
+            operator = #{operator}
+            <if test="name!=null">and name like "%"#{name}"%"</if>
+            <if test="type!=null">and type=#{type}</if>
+            <if test="attribute!=null">and attribute=#{attribute}</if>
+            <if test="status_z!=null">and status_z=#{status_z}</if>
+            <!--  <if test="name!=null">name like "%"#{name}"%"</if>
+              <if test="department!=null">department=#{department}</if>
+  &lt;!&ndash;            <if test="operator!=null">operator=#{operator}</if>&ndash;&gt;
+              <if test="type!=null">type=#{type}</if>
+              <if test="attribute!=null">attribute=#{attribute}</if>-->
+        </where>
+    </select>
+    <delete id="delSb" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        delete
+        from t_consumablesborrow
+        where id = #{id}
+    </delete>
+
+    <!--删除数据时同时删除审核表里的审核数据-->
+    <delete id="deleteReviewData" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        delete
+        from review_table
+        where review_id = #{review_id}
+    </delete>
+
+    <!--        <insert id="addSb"  parameterType="com.haocai.module.sbModule.vo.param.SbParam" >-->
+    <!--                    insert into t_consumablesborrow (id,consumablesid,name,number,price,attribute,type,department,operator,review_id)-->
+    <!--                        value( REPLACE(UUID(),"-",""),#{consumablesid},#{name},#{number},#{price},#{attribute},#{type},#{department},#{operator},#{review_id})-->
+    <!--        </insert>-->
+
+    <insert id="addSb" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        insert into t_consumablesborrow (id, consumablesId, name, type, number, price, prices, attribute, department,
+                                         standards, LibraryName, review_id, operator, con_type, sbYear, sb_time)
+            value (#{id}, #{consumablesId}, #{name}, #{type}, #{number}, #{price}, #{prices}, #{attribute},
+                   #{department},
+                   #{standards}, #{LibraryName}, #{review_id}, #{operator}, #{con_type}, #{sbYear}, #{sb_time})
+    </insert>
+    <insert id="addOut" parameterType="com.haocai.module.sbModule.vo.ConOut">
+        insert into t_consumablesout(id, name, review_id, number, department, price, attribute, type, status, status_z,
+                                     applicant, outyear, out_time, out_type, standards, prices, libraryname,
+                                     borrow_review_id)
+            value (#{id}, #{name}, #{review_id}, #{number}, #{department}, #{price}, #{attribute}, #{type}, #{status},
+                   #{status_z},
+                   #{applicant}, #{OutYear}, #{out_time}, #{out_type}, #{standards}, #{prices}, #{LibraryName},
+                   #{borrow_review_id})
+
+    </insert>
+    <!--        添加审核记录2-->
+    <insert id="AddSbReview" parameterType="com.haocai.module.sbModule.vo.ReviewTable">
+        insert into review_table(id,review_id,project_name,re_pe_id,before_re,after_re,role<if test="status!=null">
+        ,status</if>)
+        value(#{id},#{review_id},#{project_name},#{re_pe_id},#{before_re},#{after_re},#{role}<if test="status!=null">
+        ,#{status}</if>)
+    </insert>
+    <!--    根据id获取库存表耗材信息-->
+    <select id="getConById" resultType="com.haocai.module.sbModule.vo.param.SbParam">
+        select name,
+               number,
+               department,
+               price,
+               attribute,
+               type,
+               standards,
+               con_type
+        from t_consumables
+        where id = #{id}
+    </select>
+    <insert id="addCon" parameterType="com.haocai.module.sbModule.vo.SbVo">
+        insert into t_consumables(id, number, department, price, name, attribute, type, standards, status, con_type, prices)
+            VALUE (#{id}, #{number}, #{department}, #{price}, #{name}, #{attribute}, #{type}, #{standards},#{status}, #{conType},
+                   #{prices})
+    </insert>
+    <update id="updateSbReview" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        update t_consumablesborrow
+        set status=#{status},
+            status_z=#{status_z},
+            review_id=#{review_id}
+        where id = #{id};
+    </update>
+    <!--    修改借用记录表最终审核状态-->
+    <update id="updateSbBorrow" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        update t_consumablesborrow
+        set status=#{status},
+            status_z=#{status_z}
+        where review_id = #{review_id};
+    </update>
+    <!--    根据id获取借用表耗材信息-->
+    <select id="getSbById" resultType="com.haocai.module.sbModule.vo.param.SbParam">
+        select name,
+               number,
+               department,
+               price,
+               attribute,
+               type,
+               standards,
+               con_type as conType
+        from t_consumablesborrow
+        where review_id = #{review_id}
+    </select>
+    <!--    修改库存和总价格-->
+    <update id="update" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        update t_consumables
+        set number=#{number},
+            prices=#{prices}
+        where name = #{name}
+          and department = #{department}
+          and price = #{price}
+          and con_type = #{con_type}
+          and type = #{type}
+          and attribute = #{attribute}
+          and standards = #{standards}
+    </update>
+
+<!--    查询耗材库存数目-->
+    <select id="getNumber" resultType="com.haocai.module.sbModule.vo.SbVo"
+            parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        select * from t_consumables
+        <where>
+            <if test="name!=null">name=#{name}</if>
+            <if test="department!=null">AND department=#{department}</if>
+            <if test="price!=null">AND price=#{price}</if>
+            <if test="con_type!=null">AND con_type=#{con_type}</if>
+            <if test="type!=null">AND type=#{type}</if>
+            <if test="attribute!=null">AND attribute=#{attribute}</if>
+            <if test="standards!=null">AND standards=#{standards}</if>
+        </where>
+    </select>
+    <update id="updateReview" parameterType="com.haocai.module.sbModule.vo.param.SbParam">
+        update t_consumablesborrow set status_z=#{status_z}
+        <where>
+            <if test="name!=null">name=#{name}</if>
+            <if test="department!=null">AND department=#{department}</if>
+            <if test="price!=null">AND price=#{price}</if>
+            <if test="con_type!=null">AND con_type=#{con_type}</if>
+            <if test="type!=null">AND type=#{type}</if>
+            <if test="attribute!=null">AND attribute=#{attribute}</if>
+            <if test="standards!=null">AND standards=#{standards}</if>
+            <if test="review_id!=null">and review_id=#{review_id}</if>
+        </where>
+    </update>
+    <select id="getRevId" resultType="com.haocai.module.sbModule.vo.param.ReviewParam">
+        select ID
+        from review_table
+        where review_id = #{review_id}
+          and role = #{role}
+          and project_name = #{project_name}
+    </select>
+</mapper>
