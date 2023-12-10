@@ -40,7 +40,7 @@ public class TrainMegServiceImpl implements TrainMegService {
     }
 
     /**
-     * 查看添加或修改时是否存在相同depTrainMeg数据
+     * 查看添加或修改时是否存在同一二级学院同一类型的相同大赛、实训名称
      * @param trainMeg
      * @return 如果是true代表不存在相同的
      */
@@ -48,7 +48,8 @@ public class TrainMegServiceImpl implements TrainMegService {
     public Boolean selectDepTrainMegByDep(TrainMeg trainMeg) {
         ReString reString = new ReString();
         String depTrainMeg = reString.getDepTrainMeg(trainMeg);
-        List<String> selectDepTrainMeg = trainMegDao.selectDepTrainMegByDep(depTrainMeg);
+        trainMeg.setDepTrainMeg(depTrainMeg);
+        List<String> selectDepTrainMeg = trainMegDao.selectDepTrainMegByDep(trainMeg);
         return CollectionUtils.isEmpty(selectDepTrainMeg);
     }
 

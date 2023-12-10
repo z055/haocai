@@ -29,5 +29,5 @@ public interface TrainMegDao {
     public int deleteTrainMegById(@Param("id") String id);
     public int updateTrainMegById(TrainMeg trainMeg);
 
-    public List<String> selectDepTrainMegByDep(String depTrainMeg);
+    public List<String> selectDepTrainMegByDep(TrainMeg trainMeg);
 }

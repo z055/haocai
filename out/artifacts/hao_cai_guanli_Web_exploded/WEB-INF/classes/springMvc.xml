@@ -12,15 +12,15 @@
        http://www.springframework.org/schema/context/spring-context.xsd">
     <import resource="applicationContext.xml"></import>
 
-<!--    配置组件扫描-->
+    <!--    配置组件扫描-->
     <context:component-scan base-package="com.haocai.module.*">
         <!-- 只扫描controller层 -->
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
 
-<!--    <mvc:default-servlet-handler/>-->
+    <!--    <mvc:default-servlet-handler/>-->
 
-<!--     排除静态资源-->
+    <!--     排除静态资源-->
     <mvc:resources mapping="/css/**" location="WEB-INF/layui/css/"/>
     <mvc:resources mapping="/js/**" location="WEB-INF/layui/js/"/>
     <mvc:resources mapping="/fonts/**" location="WEB-INF/layui/fonts/"/>
@@ -38,22 +38,22 @@
 
     <!-- 设置freeMarker的配置文件路径 -->
     <bean id="freemarkerConfiguration" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="location" value="classpath:freemarker.properties" />
+        <property name="location" value="classpath:freemarker.properties"/>
     </bean>
     <!-- html视图解析器 必须先配置freemarkerConfig,注意html是没有prefix前缀属性的 -->
     <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-        <property name="freemarkerSettings" ref="freemarkerConfiguration" />
+        <property name="freemarkerSettings" ref="freemarkerConfiguration"/>
         <property name="templateLoaderPath">
             <value>/</value>
         </property>
     </bean>
     <bean id="htmlviewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
         <property name="prefix" value="WEB-INF/layui/"/>
-        <property name="suffix" value=".html" />
+        <property name="suffix" value=".html"/>
         <property name="order" value="0"></property>
         <property name="contentType" value="text/html;charset=UTF-8"></property>
     </bean>
-<!--解决编码问题-->
+    <!--解决编码问题-->
     <mvc:annotation-driven>
         <mvc:message-converters register-defaults="true">
             <bean class="org.springframework.http.converter.StringHttpMessageConverter">
@@ -73,30 +73,30 @@
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- 默认编码 -->
-        <property name="defaultEncoding" value="UTF-8" />
+        <property name="defaultEncoding" value="UTF-8"/>
         <!-- 文件大小最大值 -->
-        <property name="maxUploadSize" value="10485760000" />
+        <property name="maxUploadSize" value="10485760000"/>
         <!-- 内存中的最大值 -->
-        <property name="maxInMemorySize" value="40960" />
+        <property name="maxInMemorySize" value="40960"/>
     </bean>
     <bean class="com.haocai.filter.LoginFilter" id="loginFilter"></bean>
-<!--    &lt;!&ndash;    拦截器&ndash;&gt;-->
-<!--    <mvc:interceptors>-->
-<!--        <mvc:interceptor>-->
-<!--            &lt;!&ndash;                    拦截的&ndash;&gt;-->
-<!--            <mvc:mapping path="/**"/>-->
-<!--            &lt;!&ndash;                    要排除拦截的&ndash;&gt;-->
-<!--            <mvc:exclude-mapping path="/css/**"/>-->
-<!--            <mvc:exclude-mapping path="/js/**"/>-->
-<!--            <mvc:exclude-mapping path="/fonts/**"/>-->
-<!--            <mvc:exclude-mapping path="/images/**"/>-->
-<!--            <mvc:exclude-mapping path="/lib/**"/>-->
-<!--            <mvc:exclude-mapping path="/api/**"/>-->
-<!--            <mvc:exclude-mapping path="/user/login"/>-->
-<!--            <mvc:exclude-mapping path="/getCode"/>-->
-<!--            <mvc:exclude-mapping path="/page/error404"/>-->
-<!--            &lt;!&ndash;                    绑定拦截器&ndash;&gt;-->
-<!--            <ref bean="loginFilter"/>-->
-<!--        </mvc:interceptor>-->
-<!--    </mvc:interceptors>-->
+    <!--    &lt;!&ndash;    拦截器&ndash;&gt;-->
+    <!--    <mvc:interceptors>-->
+    <!--        <mvc:interceptor>-->
+    <!--            &lt;!&ndash;                    拦截的&ndash;&gt;-->
+    <!--            <mvc:mapping path="/**"/>-->
+    <!--            &lt;!&ndash;                    要排除拦截的&ndash;&gt;-->
+    <!--            <mvc:exclude-mapping path="/css/**"/>-->
+    <!--            <mvc:exclude-mapping path="/js/**"/>-->
+    <!--            <mvc:exclude-mapping path="/fonts/**"/>-->
+    <!--            <mvc:exclude-mapping path="/images/**"/>-->
+    <!--            <mvc:exclude-mapping path="/lib/**"/>-->
+    <!--            <mvc:exclude-mapping path="/api/**"/>-->
+    <!--            <mvc:exclude-mapping path="/user/login"/>-->
+    <!--            <mvc:exclude-mapping path="/getCode"/>-->
+    <!--            <mvc:exclude-mapping path="/page/error404"/>-->
+    <!--            &lt;!&ndash;                    绑定拦截器&ndash;&gt;-->
+    <!--            <ref bean="loginFilter"/>-->
+    <!--        </mvc:interceptor>-->
+    <!--    </mvc:interceptors>-->
 </beans>

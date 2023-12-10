@@ -42,7 +42,7 @@ public class TrainMegController {
         trainMeg.setAccount(account);
         Boolean notExit = trainMegService.selectDepTrainMegByDep(trainMeg);
         if (!notExit) {//有相同的不可重复添加
-            return new JsonResult(JsonResult.FALL, null, "该二级学院已存在相同的实训/大赛名称，无法重复添加");
+            return new JsonResult(JsonResult.FALL, null, "添加失败，已有同一二级学院同一类型的相同大赛、实训名称");
         }
         Boolean flag = trainMegService.addTrainMeg(trainMeg);
         if (flag) {

@@ -52,10 +52,10 @@
         </set>
         where id = #{id}
     </update>
-    <select id="selectDepTrainMegByDep" parameterType="string"
+    <select id="selectDepTrainMegByDep" parameterType="com.haocai.module.trainmegKeep.vo.TrainMeg"
             resultType="string">
         select department_trainmeg as depTrainMeg from trainmeg_keep
-        where department_trainmeg = #{depTrainMeg};
+        where department_trainmeg = #{depTrainMeg} and conType = #{conType};
     </select>
 
 </mapper>

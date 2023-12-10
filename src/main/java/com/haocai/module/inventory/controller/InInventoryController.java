@@ -16,50 +16,62 @@ import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * @description:  盘点管理 === page/inventory
+ * @return:
+ * @author: 18380
+ * @time: 2023/12/10 20:09
+ */
 @Controller
 @RequestMapping("/InInventory")
 public class InInventoryController {
+
+
+
     //用于部门的判断
     @ResponseBody
     @RequestMapping("/getUserDep")
-    public Object getUserRole(HttpSession session){
-        User user= (User) session.getAttribute("user");
-        String deptName=user.getDeptName();
+    public Object getUserRole(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        String deptName = user.getDeptName();
         return deptName;
     }
+
     @Autowired
-     private   InInventoryService IninventoryService;
+    private InInventoryService IninventoryService;
+
     @RequestMapping("/getInfo")
     @ResponseBody
-    public Object getInfo(InventoryParam inventoryParam, HttpSession session){
-       inventoryParam= (InventoryParam) ConversionStrUtil.ConversionStr(inventoryParam);
-       User user=(User)session.getAttribute("user");
-        if (!user.getDeptName().equals("教务处")){
+    public Object getInfo(InventoryParam inventoryParam, HttpSession session) {
+        inventoryParam = (InventoryParam) ConversionStrUtil.ConversionStr(inventoryParam);
+        User user = (User) session.getAttribute("user");
+        if (!user.getDeptName().equals("教务处")) {
             inventoryParam.setDepartment(user.getDeptName());
         }
-         InventoryResult result= IninventoryService.getInfo(inventoryParam);
+        InventoryResult result = IninventoryService.getInfo(inventoryParam);
         System.err.println(result);
-             JsonTemplate jsonTemplate=new JsonTemplate("查询成功",result.getList(),result.getCount());
-              return jsonTemplate.toString();
+        JsonTemplate jsonTemplate = new JsonTemplate("查询成功", result.getList(), result.getCount());
+        return jsonTemplate.toString();
     }
+
     @RequestMapping("/getAll")
     @ResponseBody
-    public Object getAll(InventoryParam inventoryParam,HttpSession session){
-        inventoryParam = (InventoryParam)ConversionStrUtil.ConversionStr(inventoryParam);
-        User user=(User)session.getAttribute("user");
-        if (!user.getDeptName().equals("教务处")){
+    public Object getAll(InventoryParam inventoryParam, HttpSession session) {
+        inventoryParam = (InventoryParam) ConversionStrUtil.ConversionStr(inventoryParam);
+        User user = (User) session.getAttribute("user");
+        if (!user.getDeptName().equals("教务处")) {
             inventoryParam.setDepartment(user.getDeptName());
         }
-        InventoryResult all= IninventoryService.getAllPrices(inventoryParam);
+        InventoryResult all = IninventoryService.getAllPrices(inventoryParam);
         BigDecimal allPri = BigDecimal.ZERO;
         List<InventoryVo> list = all.getList();
         for (InventoryVo vo : list) {
 //            BigDecimal prices = new BigDecimal(vo.getPrices());
             BigDecimal price = new BigDecimal(vo.getPrice());
             BigDecimal num = new BigDecimal(vo.getNumber());
-            BigDecimal prices ;
-            prices=price.multiply(num);
-            allPri=allPri.add(prices);
+            BigDecimal prices;
+            prices = price.multiply(num);
+            allPri = allPri.add(prices);
         }
         return allPri.toString();
     }
